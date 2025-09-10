@@ -216,7 +216,7 @@ async function downloadLatestVersion() { // Easy button to download the latest v
     let versionHash;
 
     try {
-        const data = await fetchVersionInfo("https://whichexpsare.online/api/versions/current");
+        const data = await fetchVersionInfo("https://weao.gg/api/versions/current");
         if (binaryType === "WindowsPlayer" || binaryType === "WindowsStudio64") {
             versionHash = data.Windows;
         } else if (binaryType === "MacPlayer" || binaryType === "MacStudio") {
@@ -245,7 +245,7 @@ async function downloadPreviousVersion() { // Helps retart swift users to downgr
     let versionHash;
 
     try {
-        const data = await fetchVersionInfo("https://whichexpsare.online/api/versions/past");
+        const data = await fetchVersionInfo("https://weao.gg/api/versions/past");
         if (binaryType === "WindowsPlayer" || binaryType === "WindowsStudio64") {
             versionHash = data.Windows;
         } else if (binaryType === "MacPlayer" || binaryType === "MacStudio") {
