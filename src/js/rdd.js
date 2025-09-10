@@ -216,57 +216,76 @@ async function downloadLatestVersion() { // Easy button to download the latest v
     let versionHash;
 
     try {
-        const data = await fetchVersionInfo("https://weao.gg/api/versions/current");
-        if (binaryType === "WindowsPlayer" || binaryType === "WindowsStudio64") {
-            versionHash = data.Windows;
-        } else if (binaryType === "MacPlayer" || binaryType === "MacStudio") {
-            versionHash = data.Mac;
-        } else {
-            log("[!] Error: Unknown binary type for latest version download.");
-            return;
-        }
+    const currentDomain = window.location.hostname;
 
-        let queryString = `?channel=${encodeURIComponent(channelName)}&binaryType=${encodeURIComponent(binaryType)}&version=${encodeURIComponent(versionHash)}`;
-        const compressZip = downloadForm.compressZip.checked;
-        const compressionLevel = downloadForm.compressionLevel.value;
-        if (compressZip === true) {
-            queryString += `&compressZip=true&compressionLevel=${compressionLevel}`;
-        }
-        window.open(basePath + queryString, "_blank");
+    const parts = currentDomain.split(".");
+    const domain = parts.length > 2 ? parts.slice(-2).join(".") : currentDomain;
+        
+    const apiUrl = `https://${domain}/api/versions/current`;
 
-    } catch (error) {
-        log(`[!] Error fetching latest version: ${error.message}`);
-    }
+    const data = await fetchVersionInfo(apiUrl);
+
+    if (binaryType === "WindowsPlayer" || binaryType === "WindowsStudio64") {
+        versionHash = data.Windows;
+    } else if (binaryType === "MacPlayer" || binaryType === "MacStudio") {
+        versionHash = data.Mac;
+    } else {
+        log("[!] Error: Unknown binary type for latest version download.");
+        return;
+    }
+
+    let queryString = `?channel=${encodeURIComponent(channelName)}&binaryType=${encodeURIComponent(binaryType)}&version=${encodeURIComponent(versionHash)}`;
+    const compressZip = downloadForm.compressZip.checked;
+    const compressionLevel = downloadForm.compressionLevel.value;
+    if (compressZip === true) {
+        queryString += `&compressZip=true&compressionLevel=${compressionLevel}`;
+    }
+
+    window.open(basePath + queryString, "_blank");
+
+} catch (error) {
+    log(`[!] Error fetching latest version: ${error.message}`);
+}
 }
 
-async function downloadPreviousVersion() { // Helps retart swift users to downgrade to exploit :sob: 
-    const binaryType = downloadForm.binaryType.value;
-    const channelName = downloadForm.channel.value.trim() || downloadForm.channel.placeholder;
-    let versionHash;
+async function downloadPreviousVersion() { 
+    // Helps restart swift users to downgrade to exploit :sob: 
+    const binaryType = downloadForm.binaryType.value;
+    const channelName = downloadForm.channel.value.trim() || downloadForm.channel.placeholder;
+    let versionHash;
 
-    try {
-        const data = await fetchVersionInfo("https://weao.gg/api/versions/past");
-        if (binaryType === "WindowsPlayer" || binaryType === "WindowsStudio64") {
-            versionHash = data.Windows;
-        } else if (binaryType === "MacPlayer" || binaryType === "MacStudio") {
-            versionHash = data.Mac;
-        } else {
-            log("[!] Error: Unknown binary type for previous version download.");
-            return;
-        }
+    try {
+        const currentDomain = window.location.hostname;
+        const parts = currentDomain.split(".");
+        const domain = parts.length > 2 ? parts.slice(-2).join(".") : currentDomain;
 
-        let queryString = `?channel=${encodeURIComponent(channelName)}&binaryType=${encodeURIComponent(binaryType)}&version=${encodeURIComponent(versionHash)}`;
-        const compressZip = downloadForm.compressZip.checked;
-        const compressionLevel = downloadForm.compressionLevel.value;
-        if (compressZip === true) {
-            queryString += `&compressZip=true&compressionLevel=${compressionLevel}`;
-        }
-        window.open(basePath + queryString, "_blank");
+        const apiUrl = `https://${domain}/api/versions/past`;
 
-    } catch (error) {
-        log(`[!] Error fetching previous version: ${error.message}`);
-    }
+        const data = await fetchVersionInfo(apiUrl);
+
+        if (binaryType === "WindowsPlayer" || binaryType === "WindowsStudio64") {
+            versionHash = data.Windows;
+        } else if (binaryType === "MacPlayer" || binaryType === "MacStudio") {
+            versionHash = data.Mac;
+        } else {
+            log("[!] Error: Unknown binary type for previous version download.");
+            return;
+        }
+
+        let queryString = `?channel=${encodeURIComponent(channelName)}&binaryType=${encodeURIComponent(binaryType)}&version=${encodeURIComponent(versionHash)}`;
+        const compressZip = downloadForm.compressZip.checked;
+        const compressionLevel = downloadForm.compressionLevel.value;
+        if (compressZip === true) {
+            queryString += `&compressZip=true&compressionLevel=${compressionLevel}`;
+        }
+
+        window.open(basePath + queryString, "_blank");
+
+    } catch (error) {
+        log(`[!] Error fetching previous version: ${error.message}`);
+    }
 }
+
 
 function scrollToBottom() {
     window.scrollTo({
