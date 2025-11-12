@@ -27,6 +27,7 @@ n    * If \`channel\` isn't provided, it will default to "LIVE" (pseudo identi
     * Hitting *Download Latest Version* will automatically fetch the latest deployment of Roblox
     * Hitting *Download Previous Version* will automatically fetch the previous deployment of Roblox (downgrade)
     * If you want to download a specific version, specify the version hash in the version field and hit *Download Specified Hash*
+    * If you want to include the Roblox Launcher (by WEAO), check the include launcher checkbox
 
     You can also use an extra flag we provide, \`blobDir\`, for specifying where RDD
     should fetch deployment files/binaries from. This is ONLY useful for using
@@ -183,13 +184,18 @@ function getLinkFromForm() {
         queryString += `&version=${encodeURIComponent(versionHash)}`;
     }
 
-    const compressZip = downloadForm.compressZip.checked;
-    const compressionLevel = downloadForm.compressionLevel.value;
-    if (compressZip === true) {
-        queryString += `&compressZip=true&compressionLevel=${compressionLevel}`;
-    }
+    const compressZip = downloadForm.compressZip.checked;
+    const compressionLevel = downloadForm.compressionLevel.value;
+    if (compressZip === true) {
+        queryString += `&compressZip=true&compressionLevel=${compressionLevel}`;
+    }
 
-    return basePath + queryString;
+    const includeLauncher = downloadForm.includeLauncher.checked;
+    if (includeLauncher === true) {
+        queryString += `&includeLauncher=true`;
+    }
+
+    return basePath + queryString;
 };
 
 // Called upon the "Download" form button
@@ -239,6 +245,11 @@ async function downloadLatestVersion() { // Easy button to download the latest v
     const compressionLevel = downloadForm.compressionLevel.value;
     if (compressZip === true) {
         queryString += `&compressZip=true&compressionLevel=${compressionLevel}`;
+    }
+
+    const includeLauncher = downloadForm.includeLauncher.checked;
+    if (includeLauncher === true) {
+        queryString += `&includeLauncher=true`;
     }
 
     window.open(basePath + queryString, "_blank");
@@ -427,6 +438,7 @@ let blobDir = getQuery("blobDir");
 
 let compressZip = getQuery("compressZip");
 let compressionLevel = getQuery("compressionLevel");
+let includeLauncher = getQuery("includeLauncher");
 
 let channelPath;
 let versionPath;
@@ -521,12 +533,23 @@ function main() {
             log(usageMsg, "\n", false);
             return;
         }
-    } else {
-        compressionLevel = downloadForm.compressionLevel.value; // Only applies to when `compressZip` is true aswell
-    }
+    } else {
+        compressionLevel = downloadForm.compressionLevel.value; // Only applies to when `compressZip` is true aswell
+    }
 
-    // At this point, we expect `binaryType` to be defined if all is well on input from the user..
-    if (!binaryType) {
+    if (includeLauncher) {
+        if (includeLauncher !== "true" && includeLauncher !== "false") {
+            log(`[!] Error: The \`includeLauncher\` query must be a boolean ("true" or "false"), got "${includeLauncher}"`);
+            return;
+        }
+
+        includeLauncher = (includeLauncher === "true");
+    } else {
+        includeLauncher = downloadForm.includeLauncher.checked;
+    }
+
+    // At this point, we expect `binaryType` to be defined if all is well on input from the user..
+    if (!binaryType) {
         // Again, we used to support specific versions without denoting binaryType explicitly
         log("[!] Error: Missing required \`binaryType\` query, are you using an old perm link for a specific version?", "\n\n");
         log(usageMsg, "\n", false);
