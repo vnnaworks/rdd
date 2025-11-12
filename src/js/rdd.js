@@ -19,7 +19,7 @@ const usageMsg = `[*] USAGE: ${basePath}?channel=<CHANNEL_NAME>&binaryType=<BINA
     * MacStudio
     
     Extra Notes:
-    * If \`channel\` isn't provided, it will default to "LIVE" (pseudo identifier for
+n    * If \`channel\` isn't provided, it will default to "LIVE" (pseudo identifier for
       the production channel)
     * You can provide \`binaryType\` to fetch the *latest* deployment on a channel, or
       BOTH \`binaryType\` and \`version\` to fetch a specific deployment of a specific
@@ -559,38 +559,39 @@ function main() {
         log("Copy the version hash (the area with \"version-xxxxxxxxxxxxxxxx\" in double-quotes) from the page in the link below (we can't because of CORS), and paste it in the field named \"Version Hash\" in the form above\n");
         consoleText.innerHTML += `<a target="_blank" href="${clientSettingsUrl}">${clientSettingsUrl}</a><br><br><br>`;
 
-        // Same options as may have been input from the page before
-        downloadForm.channel.value = channelNameEncoded;
-        downloadForm.binaryType.value = binaryTypeEncoded;
-        downloadForm.compressZip.checked = compressZip;
-        downloadForm.compressionLevel.value = compressionLevel;
+        downloadForm.channel.value = channelNameEncoded;
+        downloadForm.binaryType.value = binaryTypeEncoded;
+        downloadForm.compressZip.checked = compressZip;
+        downloadForm.compressionLevel.value = compressionLevel;
+        downloadForm.includeLauncher.checked = includeLauncher;
 
-        downloadFormDiv.hidden = false;
+        downloadFormDiv.hidden = false;
 
-        return;
-    }
+        return;
+    }
 };
 
 async function fetchManifest() {
    // versionPath = `${channelPath}${blobDir}${version}/`; // WEAO's R2 uses a / instead of - for the path :)
     versionPath = `${channelPath}${blobDir}${version}-`; // aws s3 uses a - for the path :)
 
-    if (binaryType === "MacPlayer" || binaryType === "MacStudio") {
-        const zipFileName = (binaryType == "MacPlayer" && "RobloxPlayer.zip") || (binaryType == "MacStudio" && "RobloxStudioApp.zip")
-        log(`[+] Fetching zip archive for BinaryType "${binaryType}" (${zipFileName})`);
+    if (binaryType === "MacPlayer" || binaryType === "MacStudio") {
+        const zipFileName = (binaryType == "MacPlayer" && "RobloxPlayer.zip") || (binaryType == "MacStudio" && "RobloxStudioApp.zip")
+        log(`[+] Fetching zip archive for BinaryType "${binaryType}" (${zipFileName})`);
 
-        const outputFileName = `WEAO-${channel}-${binaryType}-${version}.zip`; // little promo dont hurt right? :D
-        log(`[+] (Please wait!) Downloading ${outputFileName}..`, "");
+        const outputFileName = `WEAO-${channel}-${binaryType}-${version}.zip`; // little promo dont hurt right? :D
+        log(`[+] (Please wait!) Downloading ${outputFileName}..`, "");
 
         updateProgressBar(0, `Starting download for ${zipFileName}...`);
-        requestBinary(versionPath + zipFileName, function (zipData) {
-            log("done!");
+        requestBinary(versionPath + zipFileName, function (zipData) {
+            log("done!");
+            log("Thank you for using WEAO RDD! If you have any issues, please report them at our discord server: https://discord.gg/weao");
             hideProgressBar();
-            downloadBinaryFile(outputFileName, zipData);
-        }, function(percentage, loaded, total) {
+            downloadBinaryFile(outputFileName, zipData);
+        }, function(percentage, loaded, total) {
             updateProgressBar(percentage, `Downloading ${zipFileName}: ${formatBytes(loaded)} / ${formatBytes(total)}`);
         });
-    } else {
+    } else {
         log(`[+] Fetching rbxPkgManifest for ${version}@${channel}..`);
 
         // TODO: We dont support RDDs /common but should work fine since its our own R2 bucket lol?
@@ -684,32 +685,23 @@ async function downloadZipsFromManifest(manifestBody) {
     async function downloadNextPackage() {
         if (filesToDownload.length === 0) {
             // All packages have been downloaded
-            // Time to export
-            const outputFileName = `WEAO-${channel}-${binaryType}-${version}.zip`;
-            log();
-            if (compressZip) {
-                log(`[!] NOTE: Compressing final zip (with a compression level of ${compressionLevel}/9), this may take a bit longer than with no compression..`);
+            // Download launcher if needed
+            if (includeLauncher && (binaryType === "WindowsPlayer" || binaryType === "WindowsStudio64")) {
+                log();
+                log(`[+] Downloading WEAO RDD Launcher...`);
+                updateProgressBar(0, `Starting download for weblauncher.exe...`);
+                
+                requestBinary("https://cdn.weao.gg/weblauncher.exe", function(launcherData) {
+                    log(`[+] Received WEAO RDD Launcher!`);
+                    zip.file("weblauncher.exe", launcherData);
+                    exportFinalZip();
+                }, function(percentage, loaded, total) {
+                    updateProgressBar(percentage, `Downloading weblauncher.exe: ${formatBytes(loaded)} / ${formatBytes(total)}`);
+                });
+                return;
             }
-            log("Thank you for using WEAO RDD! If you have any issues, please report them at our discord server: https://discord.gg/weao");
-            log(`[+] Exporting assembled zip file "${outputFileName}".. `, "");
-            hideProgressBar(); 
-
-            zip.generateAsync({
-                type: "arraybuffer",
-                compression: compressZip ? "DEFLATE" : "STORE",
-                compressionOptions: {
-                    level: compressionLevel
-                }
-            }, function update(metadata) {
-                const percentage = metadata.percent.toFixed(2);
-                updateProgressBar(percentage, `Compressing package: ${percentage}%`);
-            }).then(function (outputZipData) {
-                zip = null;
-                log("done!");
-                hideProgressBar();
-
-                downloadBinaryFile(outputFileName, outputZipData);
-            });
+            
+            exportFinalZip();
             return;
         }
 
@@ -758,6 +750,37 @@ async function downloadZipsFromManifest(manifestBody) {
             // Update the progress 
             const message = `Workspaceing ${packageName}: ${percentage}% (${formatBytes(loaded)} / ${formatBytes(total)})`;
             updateProgressBar(percentage, message);
+        });
+    }
+
+    function exportFinalZip() {
+        const outputFileName = `WEAO-${channel}-${binaryType}-${version}.zip`;
+        log();
+        if (compressZip) {
+            log(`[!] NOTE: Compressing final zip (with a compression level of ${compressionLevel}/9), this may take a bit longer than with no compression..`);
+        }
+        log("Thank you for using WEAO RDD! If you have any issues, please report them at our discord server: https://discord.gg/weao");
+        if (includeLauncher && (binaryType === "WindowsPlayer" || binaryType === "WindowsStudio64")) {
+            log(`Make sure to open "weblauncher.exe" to be able to launch from Roblox.com! (This is optional, otherwise open "RobloxPlayerBeta.exe")`);
+        }
+        log(`[+] Exporting assembled zip file "${outputFileName}".. `, "");
+        hideProgressBar();
+
+        zip.generateAsync({
+            type: "arraybuffer",
+            compression: compressZip ? "DEFLATE" : "STORE",
+            compressionOptions: {
+                level: compressionLevel
+            }
+        }, function update(metadata) {
+            const percentage = metadata.percent.toFixed(2);
+            updateProgressBar(percentage, `Compressing package: ${percentage}%`);
+        }).then(function (outputZipData) {
+            zip = null;
+            log("done!");
+            hideProgressBar();
+
+            downloadBinaryFile(outputFileName, outputZipData);
         });
     }
 
