@@ -545,8 +545,7 @@ function main() {
 
         includeLauncher = (includeLauncher === "true");
     } else {
-        // FIX: If the query is not provided, but other queries are present (direct download), 
-        // default `includeLauncher` to false to prevent unwanted downloads.
+ 
         includeLauncher = false;
     }
 
@@ -818,39 +817,6 @@ async function downloadZipsFromManifest(manifestBody) {
     downloadNextPackage(); // Start the download process
 };
 
-    function exportFinalZip() {
-        const outputFileName = `WEAO-${channel}-${binaryType}-${version}.zip`;
-        log();
-        if (compressZip) {
-            log(`[!] NOTE: Compressing final zip (with a compression level of ${compressionLevel}/9), this may take a bit longer than with no compression..`);
-        }
-        log("Thank you for using WEAO RDD! If you have any issues, please report them at our discord server: https://discord.gg/weao");
-        if (includeLauncher && (binaryType === "WindowsPlayer" || binaryType === "WindowsStudio64")) {
-            log(`Make sure to open "weblauncher.exe" to be able to launch from Roblox.com! (This is optional, otherwise open "RobloxPlayerBeta.exe")`);
-        }
-        log(`[+] Exporting assembled zip file "${outputFileName}".. `, "");
-        hideProgressBar();
-
-        zip.generateAsync({
-            type: "arraybuffer",
-            compression: compressZip ? "DEFLATE" : "STORE",
-            compressionOptions: {
-                level: compressionLevel
-            }
-        }, function update(metadata) {
-            const percentage = metadata.percent.toFixed(2);
-            updateProgressBar(percentage, `Compressing package: ${percentage}%`);
-        }).then(function (outputZipData) {
-            zip = null;
-            log("done!");
-            hideProgressBar();
-
-            downloadBinaryFile(outputFileName, outputZipData);
-        });
-    }
-
-    downloadNextPackage(); // Start the download process
-};
 
 function formatBytes(bytes, decimals = 2) {
     if (bytes === 0) return '0 Bytes';
