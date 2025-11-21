@@ -709,10 +709,10 @@ async function downloadZipsFromManifest(manifestBody) {
         if (filesToDownload.length === 0) {
             // All packages have been downloaded
             // Download launcher if needed
-            if (
-    includeLauncher === "true" &&
-    (binaryType === "WindowsPlayer" || binaryType === "WindowsStudio64")
-) {
+           if (
+                includeLauncher === true && 
+                (binaryType === "WindowsPlayer" || binaryType === "WindowsStudio64")
+            ) {
                 log();
                 log(`[+] Downloading WEAO RDD Launcher...`);
                 updateProgressBar(0, `Starting download for weblauncher.exe...`);
