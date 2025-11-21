@@ -533,23 +533,25 @@ function main() {
             log(usageMsg, "\n", false);
             return;
         }
-    } else {
-        compressionLevel = downloadForm.compressionLevel.value; // Only applies to when `compressZip` is true aswell
-    }
+    } else {
+        compressionLevel = downloadForm.compressionLevel.value; // Only applies to when `compressZip` is true aswell
+    }
 
-    if (includeLauncher) {
-        if (includeLauncher !== "true" && includeLauncher !== "false") {
-            log(`[!] Error: The \`includeLauncher\` query must be a boolean ("true" or "false"), got "${includeLauncher}"`);
-            return;
-        }
+    if (includeLauncher) {
+        if (includeLauncher !== "true" && includeLauncher !== "false") {
+            log(`[!] Error: The \`includeLauncher\` query must be a boolean ("true" or "false"), got "${includeLauncher}"`);
+            return;
+        }
 
-        includeLauncher = (includeLauncher === "true");
-    } else {
-        includeLauncher = downloadForm.includeLauncher.checked;
-    }
+        includeLauncher = (includeLauncher === "true");
+    } else {
+        // FIX: If the query is not provided, but other queries are present (direct download), 
+        // default `includeLauncher` to false to prevent unwanted downloads.
+        includeLauncher = false;
+    }
 
-    // At this point, we expect `binaryType` to be defined if all is well on input from the user..
-    if (!binaryType) {
+    // At this point, we expect `binaryType` to be defined if all is well on input from the user..
+    if (!binaryType) {
         // Again, we used to support specific versions without denoting binaryType explicitly
         log("[!] Error: Missing required \`binaryType\` query, are you using an old perm link for a specific version?", "\n\n");
         log(usageMsg, "\n", false);
@@ -582,16 +584,18 @@ function main() {
         log("Copy the version hash (the area with \"version-xxxxxxxxxxxxxxxx\" in double-quotes) from the page in the link below (we can't because of CORS), and paste it in the field named \"Version Hash\" in the form above\n");
         consoleText.innerHTML += `<a target="_blank" href="${clientSettingsUrl}">${clientSettingsUrl}</a><br><br><br>`;
 
-        downloadForm.channel.value = channelNameEncoded;
-        downloadForm.binaryType.value = binaryTypeEncoded;
-        downloadForm.compressZip.checked = compressZip;
-        downloadForm.compressionLevel.value = compressionLevel;
-        downloadForm.includeLauncher.checked = includeLauncher;
+        downloadForm.channel.value = channelNameEncoded;
+        downloadForm.binaryType.value = binaryTypeEncoded;
+        downloadForm.compressZip.checked = compressZip;
+        downloadForm.compressionLevel.value = compressionLevel;
+        
+        // Since we are showing the form, use the checkbox state for display
+        downloadForm.includeLauncher.checked = includeLauncher; 
 
-        downloadFormDiv.hidden = false;
+        downloadFormDiv.hidden = false;
 
-        return;
-    }
+        return;
+    }
 };
 
 async function fetchManifest() {
@@ -681,103 +685,138 @@ async function downloadZipsFromManifest(manifestBody) {
 </Settings>
 `);
 
-    let totalBytesToDownload = 0;
-    let downloadedBytes = 0;
-    const filesToDownload = [];
+    let totalBytesToDownload = 0;
+    let downloadedBytes = 0;
+    const filesToDownload = [];
 
-    // First, let's try to get the total size of all files to download
-    // This part requires a HEAD request or a prior knowledge of file sizes.
-    // For simplicity, we'll assume we know the file names and will get their sizes on the fly
-    // or estimate them later if we can't get accurate sizes beforehand.
-    // For now, we'll track the progress of individual files.
+    // First, let's try to get the total size of all files to download
+    // This part requires a HEAD request or a prior knowledge of file sizes.
+    // For simplicity, we'll assume we know the file names and will get their sizes on the fly
+    // or estimate them later if we can't get accurate sizes beforehand.
+    // For now, we'll track the progress of individual files.
 
-    for (const index in pkgManifestLines) {
-        const pkgManifestLine = pkgManifestLines[index];
-        if (!pkgManifestLine.includes(".")) {
-            continue;
-        } else if (!pkgManifestLine.endsWith(".zip")) {
-            continue;
-        }
-        filesToDownload.push(pkgManifestLine);
-    }
+    for (const index in pkgManifestLines) {
+        const pkgManifestLine = pkgManifestLines[index];
+        if (!pkgManifestLine.includes(".")) {
+            continue;
+        } else if (!pkgManifestLine.endsWith(".zip")) {
+            continue;
+        }
+        filesToDownload.push(pkgManifestLine);
+    }
 
-    let filesDownloadedCount = 0;
-    let currentTotalDownloadSize = 0; // Total size of all files
-    let currentDownloadedSize = 0; // Current downloaded size across all files
+    let filesDownloadedCount = 0;
+    let currentTotalDownloadSize = 0; // Total size of all files
+    let currentDownloadedSize = 0; // Current downloaded size across all files
 
-    async function downloadNextPackage() {
-        if (filesToDownload.length === 0) {
-            // All packages have been downloaded
-            // Download launcher if needed
-           if (
-                includeLauncher === true && 
-                (binaryType === "WindowsPlayer" || binaryType === "WindowsStudio64")
-            ) {
-                log();
-                log(`[+] Downloading WEAO RDD Launcher...`);
-                updateProgressBar(0, `Starting download for weblauncher.exe...`);
-                
-                requestBinary("https://curly-shape-1578.vnnaworks.workers.dev/", function(launcherData) {
-                    log(`[+] Received WEAO RDD Launcher!`);
-                    zip.file("weblauncher.exe", launcherData);
-                    exportFinalZip();
-                }, function(percentage, loaded, total) {
-                    updateProgressBar(percentage, `Downloading weblauncher.exe: ${formatBytes(loaded)} / ${formatBytes(total)}`);
-                });
-                return;
-            }
-            
-            exportFinalZip();
-            return;
-        }
+    async function downloadNextPackage() {
+        if (filesToDownload.length === 0) {
+            // All packages have been downloaded
+            // Download launcher if needed
+            if (
+                    // FIX: Check for the boolean value `true`, not the string `"true"`
+                    includeLauncher === true &&
+                    (binaryType === "WindowsPlayer" || binaryType === "WindowsStudio64")
+                    ) {
+                log();
+                log(`[+] Downloading WEAO RDD Launcher...`);
+                updateProgressBar(0, `Starting download for weblauncher.exe...`);
+                
+                requestBinary("https://curly-shape-1578.vnnaworks.workers.dev/", function(launcherData) {
+                    log(`[+] Received WEAO RDD Launcher!`);
+                    zip.file("weblauncher.exe", launcherData);
+                    exportFinalZip();
+                }, function(percentage, loaded, total) {
+                    updateProgressBar(percentage, `Downloading weblauncher.exe: ${formatBytes(loaded)} / ${formatBytes(total)}`);
+                });
+                return;
+            }
+            
+            exportFinalZip();
+            return;
+        }
 
-        const packageName = filesToDownload.shift(); // Next package
-        log(`[+] Fetching "${packageName}"...`);
-        const blobUrl = versionPath + packageName;
+        const packageName = filesToDownload.shift(); // Next package
+        log(`[+] Fetching "${packageName}"...`);
+        const blobUrl = versionPath + packageName;
 
-        requestBinary(blobUrl, async function (blobData) {
-            log(`[+] Received package "${packageName}"!`);
+        requestBinary(blobUrl, async function (blobData) {
+            log(`[+] Received package "${packageName}"!`);
 
-            if (packageName in binExtractRoots == false) {
-                log(`[*] Package name "${packageName}" not defined in extraction roots for BinaryType \`${binaryType}\`, skipping extraction! (THIS MAY MAKE THE ZIP OUTPUT INCOMPLETE, BE AWARE!)`);
-                zip.file(packageName, blobData);
-                log(`[+] Moved package "${packageName}" directly to the root folder`);
-            } else {
-                log(`[+] Extracting "${packageName}"...`);
-                const extractRootFolder = binExtractRoots[packageName];
+            if (packageName in binExtractRoots == false) {
+                log(`[*] Package name "${packageName}" not defined in extraction roots for BinaryType \`${binaryType}\`, skipping extraction! (THIS MAY MAKE THE ZIP OUTPUT INCOMPLETE, BE AWARE!)`);
+                zip.file(packageName, blobData);
+                log(`[+] Moved package "${packageName}" directly to the root folder`);
+            } else {
+                log(`[+] Extracting "${packageName}"...`);
+                const extractRootFolder = binExtractRoots[packageName];
 
-                await JSZip.loadAsync(blobData).then(async function (packageZip) {
-                    blobData = null;
-                    let fileGetPromises = [];
+                await JSZip.loadAsync(blobData).then(async function (packageZip) {
+                    blobData = null;
+                    let fileGetPromises = [];
 
-                    packageZip.forEach(function (path, object) {
-                        if (path.endsWith("\\")) {
-                            return;
-                        }
+                    packageZip.forEach(function (path, object) {
+                        if (path.endsWith("\\")) {
+                            return;
+                        }
 
-                        const fixedPath = path.replace(/\\/g, "/");
-                        const fileGetPromise = object.async("arraybuffer").then(function (data) {
-                            zip.file(extractRootFolder + fixedPath, data);
-                        });
+                        const fixedPath = path.replace(/\\/g, "/");
+                        const fileGetPromise = object.async("arraybuffer").then(function (data) {
+                            zip.file(extractRootFolder + fixedPath, data);
+                        });
 
-                        fileGetPromises.push(fileGetPromise)
-                    });
+                        fileGetPromises.push(fileGetPromise)
+                    });
 
-                    await Promise.all(fileGetPromises);
-                    packageZip = null;
-                });
-                log(`[+] Extracted "${packageName}"!`);
-            }
-            filesDownloadedCount++;
-            // Now just continue thx
-            downloadNextPackage();
+                    await Promise.all(fileGetPromises);
+                    packageZip = null;
+                });
+                log(`[+] Extracted "${packageName}"!`);
+            }
+            filesDownloadedCount++;
+            // Now just continue thx
+            downloadNextPackage();
 
-        }, function(percentage, loaded, total) {
-            // Update the progress 
-            const message = `Workspaceing ${packageName}: ${percentage}% (${formatBytes(loaded)} / ${formatBytes(total)})`;
-            updateProgressBar(percentage, message);
-        });
-    }
+        }, function(percentage, loaded, total) {
+            // Update the progress 
+            const message = `Workspaceing ${packageName}: ${percentage}% (${formatBytes(loaded)} / ${formatBytes(total)})`;
+            updateProgressBar(percentage, message);
+        });
+    }
+
+    function exportFinalZip() {
+        const outputFileName = `WEAO-${channel}-${binaryType}-${version}.zip`;
+        log();
+        if (compressZip) {
+            log(`[!] NOTE: Compressing final zip (with a compression level of ${compressionLevel}/9), this may take a bit longer than with no compression..`);
+        }
+        log("Thank you for using WEAO RDD! If you have any issues, please report them at our discord server: https://discord.gg/weao");
+        if (includeLauncher && (binaryType === "WindowsPlayer" || binaryType === "WindowsStudio64")) {
+            log(`Make sure to open "weblauncher.exe" to be able to launch from Roblox.com! (This is optional, otherwise open "RobloxPlayerBeta.exe")`);
+        }
+        log(`[+] Exporting assembled zip file "${outputFileName}".. `, "");
+        hideProgressBar();
+
+        zip.generateAsync({
+            type: "arraybuffer",
+            compression: compressZip ? "DEFLATE" : "STORE",
+            compressionOptions: {
+                level: compressionLevel
+            }
+        }, function update(metadata) {
+            const percentage = metadata.percent.toFixed(2);
+            updateProgressBar(percentage, `Compressing package: ${percentage}%`);
+        }).then(function (outputZipData) {
+            zip = null;
+            log("done!");
+            hideProgressBar();
+
+            downloadBinaryFile(outputFileName, outputZipData);
+        });
+    }
+
+    downloadNextPackage(); // Start the download process
+};
 
     function exportFinalZip() {
         const outputFileName = `WEAO-${channel}-${binaryType}-${version}.zip`;
