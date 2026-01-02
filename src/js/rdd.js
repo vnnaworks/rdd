@@ -611,7 +611,7 @@ async function fetchManifest() {
         updateProgressBar(0, `Starting download for ${zipFileName}...`);
         requestBinary(versionPath + zipFileName, function (zipData) {
             log("done!");
-            log("Thank you for using WEAO RDD! If you have any issues, please report them at our discord server: https://discord.gg/weao");
+            log("Thank you for using WEAO RDD! If you have any issues, please report them at our discord server: https://discord.gg/weaoxyz");
             hideProgressBar();
             downloadBinaryFile(outputFileName, zipData);
         }, function(percentage, loaded, total) {
@@ -789,7 +789,7 @@ async function downloadZipsFromManifest(manifestBody) {
         if (compressZip) {
             log(`[!] NOTE: Compressing final zip (with a compression level of ${compressionLevel}/9), this may take a bit longer than with no compression..`);
         }
-        log("Thank you for using WEAO RDD! If you have any issues, please report them at our discord server: https://discord.gg/weao");
+        log("Thank you for using WEAO RDD! If you have any issues, please report them at our discord server: https://discord.gg/weaoxyz");
         if (includeLauncher && (binaryType === "WindowsPlayer" || binaryType === "WindowsStudio64")) {
             log(`Make sure to open "weblauncher.exe" to be able to launch from Roblox.com! (This is optional, otherwise open "RobloxPlayerBeta.exe")`);
         }
