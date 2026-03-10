@@ -19,7 +19,7 @@ const usageMsg = `[*] USAGE: ${basePath}?channel=<CHANNEL_NAME>&binaryType=<BINA
     * MacStudio
     
     Extra Notes:
-n    * If \`channel\` isn't provided, it will default to "LIVE" (pseudo identifier for
+    * If \`channel\` isn't provided, it will default to "LIVE" (pseudo identifier for
       the production channel)
     * You can provide \`binaryType\` to fetch the *latest* deployment on a channel, or
       BOTH \`binaryType\` and \`version\` to fetch a specific deployment of a specific
@@ -168,44 +168,38 @@ const binaryTypes = {
 
 const urlParams = new URLSearchParams(window.location.search);
 
-const consoleText = document.getElementById("consoleText");
-const downloadForm = document.getElementById("downloadForm");
-const downloadFormDiv = document.getElementById("downloadFormDiv");
-const progressBarContainer = document.getElementById("progressBarContainer");
-const progressBar = document.getElementById("progressBar");
-const progressMessage = document.getElementById("progressMessage");
+const logBox = document.getElementById("logBox");
+const form = document.getElementById("form");
+const formDiv = document.getElementById("formDiv");
+const progWrap = document.getElementById("progWrap");
+const progFill = document.getElementById("progFill");
+const progMsg = document.getElementById("progMsg");
 
-function getLinkFromForm() {
-    const channelName = downloadForm.channel.value.trim() || downloadForm.channel.placeholder;
-    let queryString = `?channel=${encodeURIComponent(channelName)}&binaryType=${encodeURIComponent(downloadForm.binaryType.value)}`;
+function getLink() {
+    const channelName = form.channel.value.trim() || form.channel.placeholder;
+    let qs = `?channel=${encodeURIComponent(channelName)}&binaryType=${encodeURIComponent(form.binaryType.value)}`;
 
-    const versionHash = downloadForm.version.value.trim();
-    if (versionHash !== "") {
-        queryString += `&version=${encodeURIComponent(versionHash)}`;
-    }
+    const ver = form.version.value.trim();
+    if (ver !== "") qs += `&version=${encodeURIComponent(ver)}`;
 
-    const compressZip = downloadForm.compressZip.checked;
-    const compressionLevel = downloadForm.compressionLevel.value;
-    if (compressZip === true) {
-        queryString += `&compressZip=true&compressionLevel=${compressionLevel}`;
-    }
+    if (form.compressZip.checked) qs += `&compressZip=true&compressionLevel=${form.compressionLevel.value}`;
+    if (form.includeLauncher.checked) qs += `&includeLauncher=true`;
+    qs += `&parallelDownloads=${form.parallelDownloads.checked}`;
 
-    const includeLauncher = downloadForm.includeLauncher.checked;
-    if (includeLauncher === true) {
-        queryString += `&includeLauncher=true`;
-    }
-
-    return basePath + queryString;
+    return basePath + qs;
 };
 
-// Called upon the "Download" form button
-function downloadFromForm() {
-    window.open(getLinkFromForm(), "_blank");
-};
-
-// Called upon the "Copy Permanent Link" form button
-function copyLinkFromForm() {
-    navigator.clipboard.writeText(getLinkFromForm());
+function dlHash() { window.open(getLink(), "_blank"); };
+function copyLink(btn) {
+    navigator.clipboard.writeText(getLink());
+    if (!btn || btn._copying) return;
+    btn._copying = true;
+    const label = btn.lastChild;
+    label.textContent = ' Copied';
+    setTimeout(() => {
+        label.textContent = ' Copy Link';
+        btn._copying = false;
+    }, 2000);
 };
 
 async function fetchVersionInfo(url) {
@@ -216,9 +210,9 @@ async function fetchVersionInfo(url) {
     return await response.json();
 }
 
-async function downloadLatestVersion() { // Easy button to download the latest version of a binary! 
-    const binaryType = downloadForm.binaryType.value;
-    const channelName = downloadForm.channel.value.trim() || downloadForm.channel.placeholder;
+async function dlLatest() { // Easy button to download the latest version of a binary! 
+    const binaryType = form.binaryType.value;
+    const channelName = form.channel.value.trim() || form.channel.placeholder;
     let versionHash;
 
     try {
@@ -241,28 +235,31 @@ async function downloadLatestVersion() { // Easy button to download the latest v
     }
 
     let queryString = `?channel=${encodeURIComponent(channelName)}&binaryType=${encodeURIComponent(binaryType)}&version=${encodeURIComponent(versionHash)}`;
-    const compressZip = downloadForm.compressZip.checked;
-    const compressionLevel = downloadForm.compressionLevel.value;
+    const compressZip = form.compressZip.checked;
+    const compressionLevel = form.compressionLevel.value;
     if (compressZip === true) {
         queryString += `&compressZip=true&compressionLevel=${compressionLevel}`;
     }
 
-    const includeLauncher = downloadForm.includeLauncher.checked;
+    const includeLauncher = form.includeLauncher.checked;
     if (includeLauncher === true) {
         queryString += `&includeLauncher=true`;
     }
+
+    queryString += `&parallelDownloads=${form.parallelDownloads.checked}`;
 
     window.open(basePath + queryString, "_blank");
 
 } catch (error) {
     log(`[!] Error fetching latest version: ${error.message}`);
+    logWarpHint();
 }
 }
 
-async function downloadPreviousVersion() { 
+async function dlPrev() { 
     // Helps restart swift users to downgrade to exploit :sob: 
-    const binaryType = downloadForm.binaryType.value;
-    const channelName = downloadForm.channel.value.trim() || downloadForm.channel.placeholder;
+    const binaryType = form.binaryType.value;
+    const channelName = form.channel.value.trim() || form.channel.placeholder;
     let versionHash;
 
     try {
@@ -284,24 +281,25 @@ async function downloadPreviousVersion() {
         }
 
         let queryString = `?channel=${encodeURIComponent(channelName)}&binaryType=${encodeURIComponent(binaryType)}&version=${encodeURIComponent(versionHash)}`;
-        const compressZip = downloadForm.compressZip.checked;
-        const compressionLevel = downloadForm.compressionLevel.value;
+        const compressZip = form.compressZip.checked;
+        const compressionLevel = form.compressionLevel.value;
         if (compressZip === true) {
             queryString += `&compressZip=true&compressionLevel=${compressionLevel}`;
         }
+
+        queryString += `&parallelDownloads=${form.parallelDownloads.checked}`;
 
         window.open(basePath + queryString, "_blank");
 
     } catch (error) {
         log(`[!] Error fetching previous version: ${error.message}`);
+        logWarpHint();
     }
 }
 
 
-function scrollToBottom() {
-    window.scrollTo({
-        top: document.body.scrollHeight
-    });
+function scrollEnd() {
+    logBox.scrollTop = logBox.scrollHeight;
 };
 
 function escHtml(originalText) {
@@ -316,47 +314,141 @@ function escHtml(originalText) {
 };
 
 function log(msg = "", end = "\n", autoScroll = true) {
-    consoleText.append(msg + end);
-    if (autoScroll) {
-        scrollToBottom();
-    }
+    const content = msg.trimEnd();
+    if (!content) return;
+
+    const entry = document.createElement("div");
+    entry.className = "entry";
+
+    let type = "l-def";
+    let text = content;
+    if (content.startsWith("[!]")) { type = "l-err";  text = content.slice(3).trim(); }
+    else if (content.startsWith("[+]")) { type = "l-ok";   text = content.slice(3).trim(); }
+    else if (content.startsWith("[*]")) { type = "l-info"; text = content.slice(3).trim(); }
+    entry.classList.add(type);
+
+    const now = new Date();
+    const time = now.toLocaleTimeString("en-US", { hour12: false });
+
+    const badge = document.createElement("span");
+    badge.className = "badge";
+    badge.textContent = time;
+
+    const msgEl = document.createElement("span");
+    msgEl.className = "msg";
+    msgEl.textContent = text;
+
+    entry.appendChild(badge);
+    entry.appendChild(msgEl);
+    logBox.appendChild(entry);
+    logBox.style.display = 'flex';
+
+    if (autoScroll) scrollEnd();
 };
 
+function logWarpHint() {
+    const entry = document.createElement("div");
+    entry.className = "entry l-err";
+
+    const badge = document.createElement("span");
+    badge.className = "badge";
+    badge.textContent = new Date().toLocaleTimeString("en-US", { hour12: false });
+
+    const msg = document.createElement("span");
+    msg.className = "msg";
+    msg.innerHTML = `Try using <a href="https://one.one.one.one/" target="_blank">Cloudflare WARP</a> to fix this. If it continues, <a href="https://discord.gg/weaoxyz" target="_blank">contact us on Discord</a>.`;
+
+    entry.appendChild(badge);
+    entry.appendChild(msg);
+    logBox.appendChild(entry);
+    logBox.style.display = 'flex';
+    scrollEnd();
+}
+
+function logLink(url, autoScroll = true) {
+    const entry = document.createElement("div");
+    entry.className = "entry l-link";
+
+    const now = new Date();
+
+    const badge = document.createElement("span");
+    badge.className = "badge";
+    badge.textContent = now.toLocaleTimeString("en-US", { hour12: false });
+
+    const link = document.createElement("a");
+    link.href = url;
+    link.target = "_blank";
+    link.className = "msg";
+    link.textContent = url;
+
+    entry.appendChild(badge);
+    entry.appendChild(link);
+    logBox.appendChild(entry);
+    logBox.style.display = 'flex';
+
+    if (autoScroll) scrollEnd();
+};
+
+const progPct = document.getElementById("progPct");
+const progEta = document.getElementById("progEta");
+let _progressStartTime = null;
+
 // Function to update the progress bar
-function updateProgressBar(percentage, message) {
-    progressBarContainer.style.display = 'block';
-    progressMessage.style.display = 'block';
-    progressBar.style.width = percentage + '%';
-    progressBar.innerText = percentage + '%';
-    progressMessage.innerText = message;
-    scrollToBottom();
+function setProgress(percentage, message) {
+    if (!_progressStartTime) _progressStartTime = Date.now();
+
+    progWrap.style.display = 'flex';
+    progFill.style.width = percentage + '%';
+    progPct.textContent = percentage + '%';
+    progMsg.textContent = message;
+
+    if (percentage > 0 && percentage < 100) {
+        const elapsed = (Date.now() - _progressStartTime) / 1000;
+        const rate = percentage / elapsed;
+        const secsLeft = Math.round((100 - percentage) / rate);
+        if (secsLeft > 0) {
+            const m = Math.floor(secsLeft / 60);
+            const s = secsLeft % 60;
+            progEta.textContent = m > 0 ? `${m}m ${s}s left` : `${s}s left`;
+        }
+    } else if (percentage >= 100) {
+        progEta.textContent = '';
+        _progressStartTime = null;
+    }
+
+    scrollEnd();
 }
 
 // Function to hide the progress bar
-function hideProgressBar() {
-    progressBarContainer.style.display = 'none';
-    progressMessage.style.display = 'none';
-    progressBar.style.width = '0%';
-    progressBar.innerText = '0%';
-    progressMessage.innerText = '';
+function hideProgress() {
+    progWrap.style.display = 'none';
+    progFill.style.width = '0%';
+    progPct.textContent = '0%';
+    progEta.textContent = '';
+    _progressStartTime = null;
+    progMsg.innerText = '';
 }
 
 // Prompt download
-function downloadBinaryFile(fileName, data, mimeType = "application/zip") {
-    const blob = new Blob([data], { type: mimeType });
+function saveFile(fileName, data, mimeType = "application/zip") {
+    const blob = new Blob([data], { type: mimeType });
 
-    let link = document.createElement("a");
-    link.href = URL.createObjectURL(blob);
-    link.download = fileName;
+    let link = document.createElement("a");
+    link.href = URL.createObjectURL(blob);
+    link.download = fileName;
+    link.style.cssText = "display:none";
 
-    let button = document.createElement("button");
-    button.innerText = `Redownload ${fileName}`;
-    link.appendChild(button);
+    let button = document.createElement("button");
+    button.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> Redownload`;
+    button.className = "redownload-btn";
+    button.title = fileName;
+    button.addEventListener("click", () => link.click());
 
-    document.body.appendChild(link);
-    scrollToBottom();
+    document.body.appendChild(link);
+    document.getElementById("progWrap").insertAdjacentElement("afterend", button);
+    scrollEnd();
 
-    button.click();
+    link.click();
 };
 
 // Soley for the manifest etc
@@ -383,7 +475,7 @@ function request(url, callback, errorOnNotOk = true) {
     httpRequest.send();
 };
 
-function requestBinary(url, callback, progressCallback = null) {
+function xhrBin(url, callback, progressCallback = null) {
     const httpRequest = new XMLHttpRequest();
 
     httpRequest.open("GET", url, true);
@@ -420,7 +512,41 @@ function requestBinary(url, callback, progressCallback = null) {
         log(`[!] Binary request error @ ${url} - ${e}`);
     };
 
-    httpRequest.send();
+    httpRequest.send();
+};
+
+function fetchBin(url, progressCallback = null) {
+    return new Promise((resolve, reject) => {
+        const httpRequest = new XMLHttpRequest();
+        httpRequest.open("GET", url, true);
+        httpRequest.responseType = "arraybuffer";
+
+        if (progressCallback) {
+            httpRequest.onprogress = function(event) {
+                if (event.lengthComputable) {
+                    progressCallback(event.loaded, event.total);
+                }
+            };
+        }
+
+        httpRequest.onload = function() {
+            if (httpRequest.status !== 200) {
+                reject(new Error(`HTTP ${httpRequest.status}`));
+                return;
+            }
+            if (!httpRequest.response) {
+                reject(new Error("No ArrayBuffer in response"));
+                return;
+            }
+            resolve(httpRequest.response);
+        };
+
+        httpRequest.onerror = function() {
+            reject(new Error("Network error"));
+        };
+
+        httpRequest.send();
+    });
 };
 
 function getQuery(queryString) {
@@ -439,6 +565,7 @@ let blobDir = getQuery("blobDir");
 let compressZip = getQuery("compressZip");
 let compressionLevel = getQuery("compressionLevel");
 let includeLauncher = getQuery("includeLauncher");
+let parallelDownloads = getQuery("parallelDownloads");
 
 let channelPath;
 let versionPath;
@@ -449,23 +576,25 @@ let zip;
 // Init
 main();
 
-function main() {
-    if (window.location.search == "") {
-        // We won't log anything else; just exit
-        downloadFormDiv.hidden = false;
-        log(usageMsg, "\n", false);
-        return;
-    }
+async function main() {
+    if (window.location.search == "") {
+        // We won't log anything else; just exit
+        formDiv.hidden = false;
+        document.getElementById("usageDiv").hidden = false;
+        return;
+    }
 
     // Query params
 
-    if (channel) {
-        if (channel !== "LIVE") {
-            channel = channel.toLowerCase();
-        }
-    } else {
-        channel = "LIVE";
-    }
+    if (channel) {
+        if (channel.toLowerCase() === "live" || channel.toLowerCase() === "production") {
+            channel = "LIVE";
+        } else {
+            channel = channel.toLowerCase();
+        }
+    } else {
+        channel = "LIVE";
+    }
 
     if (channel === "LIVE") {
         channelPath = `${hostPath}`;
@@ -516,7 +645,7 @@ function main() {
 
         compressZip = (compressZip === "true");
     } else {
-        compressZip = downloadForm.compressZip.checked;
+        compressZip = form.compressZip.checked;
     }
 
     if (compressionLevel !== "") {
@@ -534,7 +663,7 @@ function main() {
             return;
         }
     } else {
-        compressionLevel = downloadForm.compressionLevel.value; // Only applies to when `compressZip` is true aswell
+        compressionLevel = form.compressionLevel.value; // Only applies to when `compressZip` is true aswell
     }
 
     if (includeLauncher) {
@@ -572,29 +701,34 @@ function main() {
         return;
     }
 
-    if (version) {
-        // We're already good to go
-        fetchManifest();
-    } else {
-        const binaryTypeEncoded = escHtml(binaryType);
-        const channelNameEncoded = escHtml(channel);
+    if (version) {
+        fetchManifest();
+    } else {
+        try {
+            const currentDomain = window.location.hostname;
+            const parts = currentDomain.split(".");
+            const domain = parts.length > 2 ? parts.slice(-2).join(".") : currentDomain;
+            const data = await fetchVersionInfo(`https://${domain}/api/versions/current`);
 
-        const clientSettingsUrl = `https://clientsettings.roblox.com/v2/client-version/${binaryTypeEncoded}/channel/${channelNameEncoded}`;
-        log("Copy the version hash (the area with \"version-xxxxxxxxxxxxxxxx\" in double-quotes) from the page in the link below (we can't because of CORS), and paste it in the field named \"Version Hash\" in the form above\n");
-        consoleText.innerHTML += `<a target="_blank" href="${clientSettingsUrl}">${clientSettingsUrl}</a><br><br><br>`;
+            if (binaryType === "WindowsPlayer" || binaryType === "WindowsStudio64") {
+                version = data.Windows;
+            } else if (binaryType === "MacPlayer" || binaryType === "MacStudio") {
+                version = data.Mac;
+            }
 
-        downloadForm.channel.value = channelNameEncoded;
-        downloadForm.binaryType.value = binaryTypeEncoded;
-        downloadForm.compressZip.checked = compressZip;
-        downloadForm.compressionLevel.value = compressionLevel;
-        
-        // Since we are showing the form, use the checkbox state for display
-        downloadForm.includeLauncher.checked = includeLauncher; 
+            if (!version) {
+                log("[!] Could not resolve version for the selected binary type.");
+                return;
+            }
 
-        downloadFormDiv.hidden = false;
-
-        return;
-    }
+            if (!version.startsWith("version-")) version = "version-" + version;
+            log(`[*] No version specified, resolved to latest: ${version}`);
+            fetchManifest();
+        } catch (error) {
+            log(`[!] Failed to auto-fetch version: ${error.message}`);
+            logWarpHint();
+        }
+    }
 };
 
 async function fetchManifest() {
@@ -608,14 +742,15 @@ async function fetchManifest() {
         const outputFileName = `WEAO-${channel}-${binaryType}-${version}.zip`; // little promo dont hurt right? :D
         log(`[+] (Please wait!) Downloading ${outputFileName}..`, "");
 
-        updateProgressBar(0, `Starting download for ${zipFileName}...`);
-        requestBinary(versionPath + zipFileName, function (zipData) {
-            log("done!");
+        setProgress(0, `Starting download for ${zipFileName}...`);
+        xhrBin(versionPath + zipFileName, function (zipData) {
+            const elapsed = ((Date.now() - _startTime) / 1000).toFixed(1);
+            log(`done! Completed in ${elapsed}s`);
             log("Thank you for using WEAO RDD! If you have any issues, please report them at our discord server: https://discord.gg/weaoxyz");
-            hideProgressBar();
-            downloadBinaryFile(outputFileName, zipData);
+            hideProgress();
+            saveFile(outputFileName, zipData);
         }, function(percentage, loaded, total) {
-            updateProgressBar(percentage, `Downloading ${zipFileName}: ${formatBytes(loaded)} / ${formatBytes(total)}`);
+            setProgress(percentage, `Downloading ${zipFileName}: ${fmtBytes(loaded)} / ${fmtBytes(total)}`);
         });
     } else {
         log(`[+] Fetching rbxPkgManifest for ${version}@${channel}..`);
@@ -636,189 +771,182 @@ async function fetchManifest() {
                 return;
             }
             manifestBody = await resp.text();
-        } catch (error) {
-            log(`[!] An error occurred while fetching rbxPkgManifest: ${error.message}`);
+        } catch (error) {
+            log(`[!] An error occurred while fetching rbxPkgManifest: ${error.message}`);
+            logWarpHint();
             return;
         }
 
-        downloadZipsFromManifest(manifestBody);
+        const useParallel = parallelDownloads !== "false";
+        dlPackages(manifestBody, useParallel);
     }
 };
 
-async function downloadZipsFromManifest(manifestBody) {
-    const pkgManifestLines = manifestBody.split("\n").map(line => line.trim());
+async function dlPackages(manifestBody, useParallel = form.parallelDownloads.checked) {
+    const _startTime = Date.now();
+    const pkgManifestLines = manifestBody.split("\n").map(line => line.trim());
 
-    if (pkgManifestLines[0] !== "v0") {
-        log(`[!] Error: unknown rbxPkgManifest format version; expected "v0", got "${pkgManifestLines[0]}"`); // Should never fail, but bitdancer!
-        return
-    }
+    if (pkgManifestLines[0] !== "v0") {
+        log(`[!] Error: unknown rbxPkgManifest format version; expected "v0", got "${pkgManifestLines[0]}"`);
+        return;
+    }
 
-    if (pkgManifestLines.includes("RobloxApp.zip")) {
-        binExtractRoots = extractRoots.player;
+    if (pkgManifestLines.includes("RobloxApp.zip")) {
+        binExtractRoots = extractRoots.player;
+        if (binaryType === "WindowsStudio64") {
+            log(`[!] Error: BinaryType \`${binaryType}\` given, but "RobloxApp.zip" was found in the manifest!`);
+            return;
+        }
+    } else if (pkgManifestLines.includes("RobloxStudio.zip")) {
+        binExtractRoots = extractRoots.studio;
+        if (binaryType === "WindowsPlayer") {
+            log(`[!] Error: BinaryType \`${binaryType}\` given, but "RobloxStudio.zip" was found in the manifest!`);
+            return;
+        }
+    } else {
+        log("[!] Error: Bad/unrecognized rbxPkgManifest, aborting..");
+        return;
+    }
 
-        if (binaryType === "WindowsStudio64") {
-            log(`[!] Error: BinaryType \`${binaryType}\` given, but "RobloxApp.zip" was found in the manifest!`);
-            return;
-        }
-    } else if (pkgManifestLines.includes("RobloxStudio.zip")) {
-        binExtractRoots = extractRoots.studio;
+    log(`[+] Fetching blobs for BinaryType \`${binaryType}\`..`);
 
-        if (binaryType === "WindowsPlayer") {
-            log(`[!] Error: BinaryType \`${binaryType}\` given, but "RobloxStudio.zip" was found in the manifest!`);
-            return;
-        }
-    } else {
-        log("[!] Error: Bad/unrecognized rbxPkgManifest, aborting..");
-        return;
-    }
-
-    log(`[+] Fetching blobs for BinaryType \`${binaryType}\`..`);
-
-    zip = new JSZip();
-
-    // For both WindowsPlayer and WindowsStudio64
-    zip.file("AppSettings.xml", `<?xml version="1.0" encoding="UTF-8"?>
+    zip = new JSZip();
+    zip.file("AppSettings.xml", `<?xml version="1.0" encoding="UTF-8"?>
 <Settings>
-    <ContentFolder>content</ContentFolder>
-    <BaseUrl>http://www.roblox.com</BaseUrl>
+    <ContentFolder>content</ContentFolder>
+    <BaseUrl>http://www.roblox.com</BaseUrl>
 </Settings>
 `);
 
-    let totalBytesToDownload = 0;
-    let downloadedBytes = 0;
-    const filesToDownload = [];
+    const filesToDownload = pkgManifestLines.filter(l => l.includes(".") && l.endsWith(".zip"));
+    log(`[*] Download mode: ${useParallel ? "parallel" : "sequential"}`);
 
-    // First, let's try to get the total size of all files to download
-    // This part requires a HEAD request or a prior knowledge of file sizes.
-    // For simplicity, we'll assume we know the file names and will get their sizes on the fly
-    // or estimate them later if we can't get accurate sizes beforehand.
-    // For now, we'll track the progress of individual files.
+    async function procPkg(packageName, blobData) {
+        log(`[+] Received "${packageName}"!`);
+        if (!(packageName in binExtractRoots)) {
+            log(`[*] Package "${packageName}" not in extraction roots, storing at root.`);
+            zip.file(packageName, blobData);
+        } else {
+            log(`[+] Extracting "${packageName}"...`);
+            const extractRootFolder = binExtractRoots[packageName];
+            await JSZip.loadAsync(blobData).then(async (packageZip) => {
+                blobData = null;
+                const fileGetPromises = [];
+                packageZip.forEach((path, object) => {
+                    if (path.endsWith("\\")) return;
+                    const fixedPath = path.replace(/\\/g, "/");
+                    fileGetPromises.push(object.async("arraybuffer").then(data => {
+                        zip.file(extractRootFolder + fixedPath, data);
+                    }));
+                });
+                await Promise.all(fileGetPromises);
+                packageZip = null;
+            });
+            log(`[+] Extracted "${packageName}"!`);
+        }
+    }
 
-    for (const index in pkgManifestLines) {
-        const pkgManifestLine = pkgManifestLines[index];
-        if (!pkgManifestLine.includes(".")) {
-            continue;
-        } else if (!pkgManifestLine.endsWith(".zip")) {
-            continue;
-        }
-        filesToDownload.push(pkgManifestLine);
-    }
+    if (useParallel) {
+        const progressMap = {};
+        function syncProgress() {
+            let totalLoaded = 0, totalSize = 0;
+            for (const key in progressMap) {
+                totalLoaded += progressMap[key].loaded;
+                totalSize  += progressMap[key].total;
+            }
+            if (totalSize > 0) {
+                const pct = Math.round((totalLoaded / totalSize) * 100);
+                setProgress(pct, `Downloading ${filesToDownload.length} packages — ${fmtBytes(totalLoaded)} / ${fmtBytes(totalSize)}`);
+            }
+        }
 
-    let filesDownloadedCount = 0;
-    let currentTotalDownloadSize = 0; // Total size of all files
-    let currentDownloadedSize = 0; // Current downloaded size across all files
+        const downloadPromises = filesToDownload.map(packageName => {
+            const blobUrl = versionPath + packageName;
+            progressMap[blobUrl] = { loaded: 0, total: 0 };
+            log(`[+] Fetching "${packageName}"...`);
+            return fetchBin(blobUrl, (loaded, total) => {
+                progressMap[blobUrl] = { loaded, total };
+                syncProgress();
+            }).then(blobData => procPkg(packageName, blobData))
+              .catch(err => { log(`[!] Error downloading "${packageName}": ${err.message}`); logWarpHint(); throw err; });
+        });
 
-    async function downloadNextPackage() {
-        if (filesToDownload.length === 0) {
-            // All packages have been downloaded
-            // Download launcher if needed
-            if (
-                    // FIX: Check for the boolean value `true`, not the string `"true"`
-                    includeLauncher === true &&
-                    (binaryType === "WindowsPlayer" || binaryType === "WindowsStudio64")
-                    ) {
-                log();
-                log(`[+] Downloading WEAO RDD Launcher...`);
-                updateProgressBar(0, `Starting download for weblauncher.exe...`);
-                
-                requestBinary("https://curly-shape-1578.vnnaworks.workers.dev/", function(launcherData) {
-                    log(`[+] Received WEAO RDD Launcher!`);
-                    zip.file("weblauncher.exe", launcherData);
-                    exportFinalZip();
-                }, function(percentage, loaded, total) {
-                    updateProgressBar(percentage, `Downloading weblauncher.exe: ${formatBytes(loaded)} / ${formatBytes(total)}`);
-                });
-                return;
-            }
-            
-            exportFinalZip();
-            return;
-        }
+        try {
+            await Promise.all(downloadPromises);
+        } catch {
+            log(`[!] One or more packages failed to download, aborting.`);
+            return;
+        }
+    } else {
+        let idx = 0;
+        for (const packageName of filesToDownload) {
+            idx++;
+            log(`[+] Fetching "${packageName}" (${idx}/${filesToDownload.length})...`);
+            try {
+                const blobData = await fetchBin(versionPath + packageName, (loaded, total) => {
+                    if (total > 0) setProgress(
+                        Math.round((loaded / total) * 100),
+                        `Downloading "${packageName}": ${fmtBytes(loaded)} / ${fmtBytes(total)}`
+                    );
+                });
+                await procPkg(packageName, blobData);
+            } catch (err) {
+                log(`[!] Error downloading "${packageName}": ${err.message}`);
+                logWarpHint();
+                return;
+            }
+        }
+    }
 
-        const packageName = filesToDownload.shift(); // Next package
-        log(`[+] Fetching "${packageName}"...`);
-        const blobUrl = versionPath + packageName;
+    // Download launcher if needed
+    if (includeLauncher === true && (binaryType === "WindowsPlayer" || binaryType === "WindowsStudio64")) {
+        log(`[+] Downloading WEAO RDD Launcher...`);
+        setProgress(0, `Starting download for weblauncher.exe...`);
+        await new Promise((resolve) => {
+            xhrBin("https://curly-shape-1578.vnnaworks.workers.dev/", function(launcherData) {
+                log(`[+] Received WEAO RDD Launcher!`);
+                zip.file("weblauncher.exe", launcherData);
+                resolve();
+            }, function(percentage, loaded, total) {
+                setProgress(percentage, `Downloading weblauncher.exe: ${fmtBytes(loaded)} / ${fmtBytes(total)}`);
+            });
+        });
+    }
 
-        requestBinary(blobUrl, async function (blobData) {
-            log(`[+] Received package "${packageName}"!`);
+    buildZip();
 
-            if (packageName in binExtractRoots == false) {
-                log(`[*] Package name "${packageName}" not defined in extraction roots for BinaryType \`${binaryType}\`, skipping extraction! (THIS MAY MAKE THE ZIP OUTPUT INCOMPLETE, BE AWARE!)`);
-                zip.file(packageName, blobData);
-                log(`[+] Moved package "${packageName}" directly to the root folder`);
-            } else {
-                log(`[+] Extracting "${packageName}"...`);
-                const extractRootFolder = binExtractRoots[packageName];
+    function buildZip() {
+        const outputFileName = `WEAO-${channel}-${binaryType}-${version}.zip`;
+        log();
+        if (compressZip) {
+            log(`[!] NOTE: Compressing final zip (level ${compressionLevel}/9) — this runs on the main thread and may freeze the page for a while. Most of the content is already zipped so gains are minimal.`);
+        }
+        log("Thank you for using WEAO RDD! If you have any issues, please report them at our discord server: https://discord.gg/weaoxyz");
+        if (includeLauncher && (binaryType === "WindowsPlayer" || binaryType === "WindowsStudio64")) {
+            log(`Make sure to open "weblauncher.exe" to be able to launch from Roblox.com! (This is optional, otherwise open "RobloxPlayerBeta.exe")`);
+        }
+        log(`[+] Exporting assembled zip file "${outputFileName}"..`);
+        hideProgress();
 
-                await JSZip.loadAsync(blobData).then(async function (packageZip) {
-                    blobData = null;
-                    let fileGetPromises = [];
-
-                    packageZip.forEach(function (path, object) {
-                        if (path.endsWith("\\")) {
-                            return;
-                        }
-
-                        const fixedPath = path.replace(/\\/g, "/");
-                        const fileGetPromise = object.async("arraybuffer").then(function (data) {
-                            zip.file(extractRootFolder + fixedPath, data);
-                        });
-
-                        fileGetPromises.push(fileGetPromise)
-                    });
-
-                    await Promise.all(fileGetPromises);
-                    packageZip = null;
-                });
-                log(`[+] Extracted "${packageName}"!`);
-            }
-            filesDownloadedCount++;
-            // Now just continue thx
-            downloadNextPackage();
-
-        }, function(percentage, loaded, total) {
-            // Update the progress 
-            const message = `Workspaceing ${packageName}: ${percentage}% (${formatBytes(loaded)} / ${formatBytes(total)})`;
-            updateProgressBar(percentage, message);
-        });
-    }
-
-    function exportFinalZip() {
-        const outputFileName = `WEAO-${channel}-${binaryType}-${version}.zip`;
-        log();
-        if (compressZip) {
-            log(`[!] NOTE: Compressing final zip (with a compression level of ${compressionLevel}/9), this may take a bit longer than with no compression..`);
-        }
-        log("Thank you for using WEAO RDD! If you have any issues, please report them at our discord server: https://discord.gg/weaoxyz");
-        if (includeLauncher && (binaryType === "WindowsPlayer" || binaryType === "WindowsStudio64")) {
-            log(`Make sure to open "weblauncher.exe" to be able to launch from Roblox.com! (This is optional, otherwise open "RobloxPlayerBeta.exe")`);
-        }
-        log(`[+] Exporting assembled zip file "${outputFileName}".. `, "");
-        hideProgressBar();
-
-        zip.generateAsync({
-            type: "arraybuffer",
-            compression: compressZip ? "DEFLATE" : "STORE",
-            compressionOptions: {
-                level: compressionLevel
-            }
-        }, function update(metadata) {
-            const percentage = metadata.percent.toFixed(2);
-            updateProgressBar(percentage, `Compressing package: ${percentage}%`);
-        }).then(function (outputZipData) {
-            zip = null;
-            log("done!");
-            hideProgressBar();
-
-            downloadBinaryFile(outputFileName, outputZipData);
-        });
-    }
-
-    downloadNextPackage(); // Start the download process
+        zip.generateAsync({
+            type: "arraybuffer",
+            compression: compressZip ? "DEFLATE" : "STORE",
+            compressionOptions: { level: compressionLevel }
+        }, function update(metadata) {
+            const percentage = metadata.percent.toFixed(2);
+            setProgress(percentage, `Compressing: ${percentage}%`);
+        }).then(function(outputZipData) {
+            zip = null;
+            const elapsed = ((Date.now() - _startTime) / 1000).toFixed(1);
+            log(`[+] Done! Completed in ${elapsed}s`);
+            hideProgress();
+            saveFile(outputFileName, outputZipData);
+        });
+    }
 };
 
 
-function formatBytes(bytes, decimals = 2) {
+function fmtBytes(bytes, decimals = 2) {
     if (bytes === 0) return '0 Bytes';
     const k = 1024;
     const dm = decimals < 0 ? 0 : decimals;
