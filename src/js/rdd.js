@@ -566,6 +566,7 @@ let compressZip = getQuery("compressZip");
 let compressionLevel = getQuery("compressionLevel");
 let includeLauncher = getQuery("includeLauncher");
 let parallelDownloads = getQuery("parallelDownloads");
+let exploit = getQuery("exploit");
 
 let channelPath;
 let versionPath;
@@ -678,13 +679,17 @@ async function main() {
         includeLauncher = false;
     }
 
-    // At this point, we expect `binaryType` to be defined if all is well on input from the user..
-    if (!binaryType) {
-        // Again, we used to support specific versions without denoting binaryType explicitly
-        log("[!] Error: Missing required \`binaryType\` query, are you using an old perm link for a specific version?", "\n\n");
-        log(usageMsg, "\n", false);
-        return;
-    }
+    // At this point, we expect `binaryType` to be defined if all is well on input from the user..
+    if (!binaryType) {
+        if (exploit) {
+            formDiv.hidden = false;
+            return;
+        }
+        // Again, we used to support specific versions without denoting binaryType explicitly
+        log("[!] Error: Missing required \`binaryType\` query, are you using an old perm link for a specific version?", "\n\n");
+        log(usageMsg, "\n", false);
+        return;
+    }
 
     let versionFilePath; // Only used if `version` isn't already defined (later, see code below the if-else after this)
     if (binaryType in binaryTypes) {
@@ -700,6 +705,26 @@ async function main() {
         log(usageMsg);
         return;
     }
+
+    if (exploit && !version) {
+        try {
+            const hn = window.location.hostname.split('.');
+            const base = hn.length > 2 ? `${location.protocol}//${hn.slice(-2).join('.')}` : `${location.protocol}//${hn.join('.')}`;
+            const list = await fetch(`${base}/api/status/exploits`).then(r => r.json());
+            const m = list.find(e => e.title.toLowerCase() === exploit.toLowerCase());
+            if (m?.rbxversion) {
+                version = m.rbxversion;
+                log(`[*] Resolved exploit "${m.title}" → ${version}`);
+            } else {
+                log(`[!] Could not find exploit "${exploit}" or it has no version.`);
+                return;
+            }
+        } catch (err) {
+            log(`[!] Failed to fetch exploit version for "${exploit}": ${err.message}`);
+            logWarpHint();
+            return;
+        }
+    }
 
     if (version) {
         fetchManifest();

@@ -9,6 +9,7 @@
 <html lang="en">
 
 <head>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>WEAO - RDD</title>
     <link rel="icon" href="favicon.svg">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pako/2.1.0/pako.min.js"></script>
@@ -20,7 +21,7 @@
         <div class="hdr no-select">
             <p>RDD - "Roblox Deployment Downloader" &#40;<a target="_blank" href="https://github.com/latte-soft/rdd">GitHub Repository</a>&#41;<br>Copyright (c) 2024-2025 Latte Softworks <a target="_blank" href="https://latte.to">&lt;latte.to&gt;</a> | <a target="_blank" href="https://github.com/latte-soft/rdd/blob/master/LICENSE">MIT License</a></p>
             <div class="notice">
-                <p><svg class="notice-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg> This is an unofficial fork of RDD, maintained independently by What<span class="weao-exps">Exps</span>Are.<span class="weao-online">Online</span>. Trusted domains: rdd.whatexpsare.online, rdd.weao.gg, rdd.weao.xyz. Questions? <a target="_blank" href="https://discord.gg/weaoxyz">Join our Discord</a>.</p>
+                <p><svg class="notice-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg> This is an unofficial fork of RDD, maintained independently by <a target="_blank" href="https://whatexpsare.online" class="brand">What<span class="exps">Exps</span>Are.<span class="online">Online</span></a>. Trusted domains: rdd.whatexpsare.online, rdd.weao.gg, rdd.weao.xyz. Questions? <a target="_blank" href="https://discord.gg/weaoxyz">Join our Discord</a>.</p>
             </div>
         </div>
 
@@ -52,15 +53,31 @@
                     <label for="channel">Channel</label>
                     <input id="channel" name="channel" type="text" placeholder="LIVE">
 
-                    <label for="version">Version Hash</label>
-                    <div class="frow">
+                    <label for="version" id="versionLabel">Version Hash</label>
+                    <div class="frow" id="versionRow">
                         <input id="version" name="version" type="text">
                         <span class="hint">Optional</span>
                     </div>
 
+                    <label id="exploitLabel">Exploit</label>
+                    <div id="exploitWrap">
+                        <div id="exploitPills" class="ex-pills">
+                            <span class="ex-hint">Loading…</span>
+                        </div>
+                        <div id="exploitChosen" class="ex-chosen" style="display:none">
+                            <div class="ex-pick">
+                                <img id="exploitChosenLogo" class="ex-logo" src="" alt="" style="display:none">
+                                <span id="exploitChosenName"></span>
+                                <button type="button" class="ex-clear" onclick="clearExploit();">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
                     <div class="sep"></div><div class="sep"></div>
 
-                    <label for="compressZip">Compress Zip</label>
+                    <label for="compressZip" data-tooltip="Reduces zip size but takes longer to download">Compress Zip</label>
                     <input id="compressZip" name="compressZip" type="checkbox">
 
                     <label for="compressionLevel" id="compLabel" style="display:none">Compression Level</label>
@@ -69,14 +86,11 @@
                         <span class="hint" id="compVal">1</span>
                     </div>
 
-                    <label for="includeLauncher">Include Launcher</label>
+                    <label for="includeLauncher" data-tooltip="Lets you launch directly from Roblox.com or private servers">Include Launcher</label>
                     <input id="includeLauncher" name="includeLauncher" type="checkbox" checked>
 
-                    <label for="parallelDownloads">Parallel Downloads</label>
-                    <div class="frow">
-                        <input id="parallelDownloads" name="parallelDownloads" type="checkbox" checked>
-                        <span class="hint">(If you have good internet use this)</span>
-                    </div>
+                    <label for="parallelDownloads" data-tooltip="Downloads multiple files at once, faster with good internet">Parallel Downloads</label>
+                    <input id="parallelDownloads" name="parallelDownloads" type="checkbox" checked>
                 </div>
 
                 <div class="fbtns">
@@ -88,7 +102,7 @@
                         <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
                         Download Previous
                     </button>
-                    <button type="button" onclick="dlHash();">Download Specified</button>
+                    <button id="btnSpecified" type="button" onclick="dlHash();">Download Specified</button>
                     <button id="btnCopy" type="button" onclick="copyLink(this);">
                         <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
                         Copy Link
@@ -130,6 +144,153 @@
 <script src="js/jszip.min.js"></script>
 <script src="js/rdd.js?v=1"></script>
 <script>
+(function () {
+    const PLAT_ORDER = { wexecutor: 0, wexternal: 1, mexecutor: 2 };
+    const TYPES      = new Set(['wexecutor', 'wexternal', 'mexecutor']);
+    const STUDIOS    = new Set(['WindowsStudio64', 'MacStudio']);
+    const MAC        = new Set(['MacPlayer', 'MacStudio']);
+    const LIMIT      = 8;
+
+    const p = location.hostname.split('.');
+    p.shift();
+    const api = `${location.protocol}//${p.join('.')}/api/status/exploits`;
+
+    fetch(api).then(r => r.json())
+        .then(data => {
+            const wrap = document.getElementById('exploitPills');
+            wrap.innerHTML = '';
+
+            const list = data
+                .filter(e => !e.hidden && TYPES.has(e.extype))
+                .sort((a, b) => {
+                    const d = (PLAT_ORDER[a.extype] ?? 9) - (PLAT_ORDER[b.extype] ?? 9);
+                    return d !== 0 ? d : (a.index ?? 99) - (b.index ?? 99);
+                });
+
+            if (!list.length) {
+                wrap.innerHTML = '<span class="ex-hint">No exploits available</span>';
+                return;
+            }
+
+            function collapse() {
+                wrap.querySelector('.ex-more')?.remove();
+                wrap.querySelectorAll('.ex-pill.collapsed').forEach(p => {
+                    p.classList.remove('collapsed');
+                    p.style.display = '';
+                });
+                const vis = Array.from(wrap.querySelectorAll('.ex-pill')).filter(p => p.style.display !== 'none');
+                if (vis.length <= LIMIT) return;
+                vis.slice(LIMIT).forEach(p => { p.classList.add('collapsed'); p.style.display = 'none'; });
+                const btn = document.createElement('button');
+                btn.type = 'button';
+                btn.className = 'ex-more';
+                btn.textContent = `+${vis.length - LIMIT} more`;
+                btn.onclick = () => {
+                    wrap.querySelectorAll('.ex-pill.collapsed').forEach(p => { p.classList.remove('collapsed'); p.style.display = ''; });
+                    btn.remove();
+                };
+                wrap.appendChild(btn);
+            }
+
+            window.filterPlatform = function(bt) {
+                const studio = STUDIOS.has(bt);
+                const mac    = MAC.has(bt);
+                document.getElementById('exploitLabel').style.display = studio ? 'none' : '';
+                document.getElementById('exploitWrap').style.display  = studio ? 'none' : '';
+                if (studio) window.clearExploit?.();
+                const hint = document.querySelector('#versionRow .hint');
+                if (hint) {
+                    hint.textContent      = studio ? 'Required' : 'Optional';
+                    hint.style.color      = studio ? 'rgba(236,59,71,0.65)' : '';
+                    hint.style.fontWeight = studio ? '500' : '';
+                }
+                wrap.querySelectorAll('.ex-pill').forEach(p => {
+                    p.style.display = (mac ? p.dataset.extype === 'mexecutor' : p.dataset.extype !== 'mexecutor') ? '' : 'none';
+                });
+                collapse();
+            };
+
+            window._exps = list;
+
+            list.forEach(e => {
+                const pill = document.createElement('button');
+                pill.type = 'button';
+                pill.className = 'ex-pill';
+                pill.dataset.extype = e.extype;
+                const logo = e.slug?.logo;
+                if (logo?.trim()) {
+                    const img = document.createElement('img');
+                    img.src = logo; img.className = 'ex-logo'; img.alt = '';
+                    img.onerror = () => img.remove();
+                    pill.appendChild(img);
+                }
+                const span = document.createElement('span');
+                span.textContent = e.title;
+                pill.appendChild(span);
+                pill.onclick = () => window.selectExploit(e, logo);
+                wrap.appendChild(pill);
+            });
+
+            window.filterPlatform(document.getElementById('binaryType').value);
+            window._autoSelect?.();
+        })
+        .catch(() => {
+            document.getElementById('exploitPills').innerHTML = '<span class="ex-hint">Failed to load exploits</span>';
+        });
+
+    window.selectExploit = function(e, logo) {
+        document.getElementById('version').value = e.rbxversion || '';
+        document.getElementById('versionLabel').style.display = 'none';
+        document.getElementById('versionRow').style.display = 'none';
+        document.getElementById('exploitPills').style.display = 'none';
+        const img = document.getElementById('exploitChosenLogo');
+        img.style.display = logo?.trim() ? '' : 'none';
+        if (logo?.trim()) img.src = logo;
+        document.getElementById('exploitChosenName').textContent = e.title;
+        document.getElementById('exploitChosen').style.display = 'flex';
+        const spec = document.getElementById('btnSpecified');
+        if (spec) spec.textContent = 'Download ' + (e.rbxversion || e.title);
+        document.getElementById('btnLatest').style.display = 'none';
+        document.getElementById('btnPrev').style.display   = 'none';
+    };
+
+    window.clearExploit = function() {
+        document.getElementById('version').value = '';
+        document.getElementById('versionLabel').style.display = '';
+        document.getElementById('versionRow').style.display = '';
+        document.getElementById('exploitPills').style.display = '';
+        document.getElementById('exploitChosen').style.display = 'none';
+        const spec = document.getElementById('btnSpecified');
+        if (spec) spec.textContent = 'Download Specified';
+        const bt = document.querySelector('#binDrop select')?.value;
+        if (!STUDIOS.has(bt)) {
+            document.getElementById('btnLatest').style.display = '';
+            document.getElementById('btnPrev').style.display   = '';
+        }
+    };
+
+    if (typeof getLink === 'function') {
+        const _orig = getLink;
+        window.getLink = function() {
+            let url = _orig();
+            const name = document.getElementById('exploitChosenName').textContent;
+            if (name) {
+                url = url.replace(/[&?]version=[^&]*/g, '');
+                url += '&exploit=' + encodeURIComponent(name);
+            }
+            return url;
+        };
+    }
+
+    window._exps = [];
+    window._autoSelect = function() {
+        const param = new URLSearchParams(location.search).get('exploit');
+        if (!param) return;
+        const m = window._exps.find(e => e.title.toLowerCase() === param.toLowerCase());
+        if (m) window.selectExploit(m, m.slug?.logo || '');
+    };
+})();
+
 (function () {
     const cbCompress  = document.getElementById('compressZip');
     const compLabel   = document.getElementById('compLabel');
@@ -176,6 +337,7 @@
             drop.classList.remove('open');
             btn.setAttribute('aria-expanded', 'false');
             syncVerBtns(item.dataset.value);
+            window.filterPlatform?.(item.dataset.value);
         });
     });
 

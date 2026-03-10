@@ -2,19 +2,40 @@
 
 :root {
     color-scheme: dark;
-    --bg-page: #1a1a1a;
+    --bg-page: #161616;
     --font-sans: 'Poppins', sans-serif;
     --weao-green: #3bea57;
     --weao-red: #ec3b47;
-    --card-bg: #2124257c;
-    --card-border: #ffffff1a;
+    --card-bg: rgba(28, 30, 32, 0.75);
+    --card-border: rgba(255, 255, 255, 0.08);
 }
 
 html {
-    background-color: var(--bg-page);
+    background: #161616;
+    min-height: 100%;
     font-family: var(--font-sans);
     color: #d4d4d4;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(255,255,255,0.1) transparent;
 }
+
+html::-webkit-scrollbar {
+    width: 6px;
+}
+
+html::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+html::-webkit-scrollbar-thumb {
+    background: rgba(255,255,255,0.1);
+    border-radius: 99px;
+}
+
+html::-webkit-scrollbar-thumb:hover {
+    background: rgba(255,255,255,0.18);
+}
+
 
 body {
     margin: 0;
@@ -24,7 +45,22 @@ body {
     display: flex;
     flex-direction: column;
     align-items: center;
+    position: relative;
 }
+
+body::before {
+    content: '';
+    position: fixed;
+    inset: -50%;
+    width: 200%;
+    height: 200%;
+    background-image: radial-gradient(circle, rgba(255,255,255,0.035) 1px, transparent 1px);
+    background-size: 22px 22px;
+    transform: rotate(15deg);
+    pointer-events: none;
+    z-index: 1;
+}
+
 
 a:link,
 a:visited {
@@ -45,12 +81,12 @@ button {
     font-weight: normal;
 }
 
-.weao-exps {
+.exps {
     color: var(--weao-red);
     font-weight: 400;
 }
 
-.weao-online {
+.online {
     color: var(--weao-green);
     font-weight: 400;
 }
@@ -103,6 +139,16 @@ button {
     opacity: 0.7;
 }
 
+.brand,
+.notice .brand,
+.notice .brand:link,
+.notice .brand:visited {
+    color: #ffffff;
+    font-weight: 400;
+    text-decoration: none;
+    transition: opacity 0.2s ease;
+}
+
 .stack {
     display: flex;
     flex-direction: column;
@@ -117,8 +163,12 @@ button {
 }
 
 form {
-    background-color: var(--card-bg);
-    border: 1px solid var(--card-border);
+    background:
+        linear-gradient(var(--card-bg), var(--card-bg)) padding-box,
+        linear-gradient(180deg, rgba(255,255,255,0.12) 0%, rgba(255,255,255,0.04) 100%) border-box;
+    border: 1px solid transparent;
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
     border-radius: 8px;
     padding: 16px;
 }
@@ -132,8 +182,49 @@ form {
 
 .fgrid label {
     font-size: 0.78rem;
-    color: #777;
+    color: #909090;
     white-space: nowrap;
+    position: relative;
+}
+
+.fgrid label[data-tooltip]::before {
+    content: attr(data-tooltip);
+    position: absolute;
+    bottom: calc(100% + 10px);
+    left: 50%;
+    transform: translateX(-50%) translateY(4px);
+    background: #ffffff;
+    color: #111111;
+    font-size: 0.72rem;
+    font-weight: 500;
+    padding: 6px 12px;
+    border-radius: 99px;
+    white-space: nowrap;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.15s ease, transform 0.15s ease;
+    z-index: 202;
+}
+
+.fgrid label[data-tooltip]::after {
+    content: '';
+    position: absolute;
+    bottom: calc(100% + 6px);
+    left: 50%;
+    transform: translateX(-50%) translateY(4px);
+    border-width: 7px 7px 0 7px;
+    border-style: solid;
+    border-color: #ffffff transparent transparent transparent;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.15s ease, transform 0.15s ease;
+    z-index: 202;
+}
+
+.fgrid label[data-tooltip]:hover::before,
+.fgrid label[data-tooltip]:hover::after {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
 }
 
 .sep {
@@ -165,20 +256,27 @@ form {
 form input[type="text"],
 form input[type="number"],
 form select {
-    background: var(--card-bg);
-    border: 1px solid var(--card-border);
+    background: #161616;
+    border: 1px solid rgba(255,255,255,0.09);
     border-radius: 6px;
     color: #e0e0e0;
     font-family: var(--font-sans);
     font-size: 13px;
     font-weight: 400;
-    padding: 6px 12px;
+    padding: 7px 12px;
     outline: none;
     width: fit-content;
     max-width: 180px;
     min-width: 0;
     box-sizing: border-box;
-    transition: all 0.2s ease;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+}
+
+form input[type="text"]:hover,
+form input[type="number"]:hover,
+form select:hover {
+    background: #161616;
+    border-color: rgba(255,255,255,0.2);
 }
 
 form input[type="number"] {
@@ -191,7 +289,7 @@ form input[type="range"] {
     appearance: none;
     width: 120px;
     height: 4px;
-    background: rgba(255,255,255,0.1);
+    background: rgba(255,255,255,0.08);
     border-radius: 99px;
     border: none;
     outline: none;
@@ -202,38 +300,38 @@ form input[type="range"] {
 
 form input[type="range"]::-webkit-slider-thumb {
     -webkit-appearance: none;
-    width: 14px;
-    height: 14px;
+    width: 13px;
+    height: 13px;
     border-radius: 50%;
-    background: #fff;
+    background: var(--weao-green);
     border: none;
     cursor: pointer;
-    transition: transform 0.15s ease, background 0.15s ease;
+    transition: transform 0.15s ease;
 }
 
 form input[type="range"]::-webkit-slider-thumb:hover {
     transform: scale(1.2);
-    background: var(--weao-green);
 }
 
 form input[type="range"]::-moz-range-thumb {
-    width: 14px;
-    height: 14px;
+    width: 13px;
+    height: 13px;
     border-radius: 50%;
-    background: #fff;
+    background: var(--weao-green);
     border: none;
     cursor: pointer;
 }
 
 form input[type="text"]::placeholder {
-    color: #666;
+    color: #555;
     font-weight: 400;
 }
 
 form input[type="text"]:focus,
 form input[type="number"]:focus,
 form select:focus {
-    border-color: var(--card-border);
+    border-color: rgba(255,255,255,0.22);
+    background: rgba(255,255,255,0.03);
     box-shadow: none;
 }
 
@@ -250,8 +348,8 @@ form select option {
     display: flex;
     align-items: center;
     gap: 6px;
-    background: var(--card-bg);
-    border: 1px solid var(--card-border);
+    background: #161616;
+    border: 1px solid rgba(255,255,255,0.09);
     border-radius: 6px;
     color: #d4d4d4;
     font-family: var(--font-sans);
@@ -380,7 +478,9 @@ form input[type="checkbox"]:checked::after {
     cursor: pointer;
     transition: all 0.2s ease;
     white-space: nowrap;
+    position: relative;
 }
+
 
 .fbtns button:hover {
     background: rgba(255,255,255,0.1);
@@ -412,8 +512,12 @@ form input[type="checkbox"]:checked::after {
 }
 
 .hdr {
-    background-color: var(--card-bg);
-    border: 1px solid var(--card-border);
+    background:
+        linear-gradient(var(--card-bg), var(--card-bg)) padding-box,
+        linear-gradient(180deg, rgba(255,255,255,0.12) 0%, rgba(255,255,255,0.04) 100%) border-box;
+    border: 1px solid transparent;
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
     border-radius: 8px;
     padding: 16px 18px 12px;
 }
@@ -435,8 +539,12 @@ form input[type="checkbox"]:checked::after {
     max-width: 760px;
     max-height: 480px;
     margin-top: 10px;
-    background-color: var(--card-bg);
-    border: 1px solid var(--card-border);
+    background:
+        linear-gradient(var(--card-bg), var(--card-bg)) padding-box,
+        linear-gradient(180deg, rgba(255,255,255,0.12) 0%, rgba(255,255,255,0.04) 100%) border-box;
+    border: 1px solid transparent;
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
     border-radius: 10px;
     overflow-y: auto;
     overflow-x: hidden;
@@ -562,8 +670,12 @@ form input[type="checkbox"]:checked::after {
 }
 
 .usage {
-    background-color: var(--card-bg);
-    border: 1px solid var(--card-border);
+    background:
+        linear-gradient(var(--card-bg), var(--card-bg)) padding-box,
+        linear-gradient(180deg, rgba(255,255,255,0.12) 0%, rgba(255,255,255,0.04) 100%) border-box;
+    border: 1px solid transparent;
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
     border-radius: 8px;
     padding: 16px 18px;
     font-size: 0.83rem;
@@ -607,18 +719,145 @@ form input[type="checkbox"]:checked::after {
     color: #666;
 }
 
-@media (max-width: 520px) {
+.ex-pills {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+    align-items: flex-start;
+}
+
+.ex-hint {
+    font-size: 0.72rem;
+    color: #555;
+}
+
+.ex-more {
+    display: inline-flex;
+    align-items: center;
+    background: none;
+    border: 1px dashed rgba(255,255,255,0.12);
+    border-radius: 99px;
+    color: #555;
+    font-family: var(--font-sans);
+    font-size: 0.68rem;
+    padding: 3px 9px;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    white-space: nowrap;
+}
+
+.ex-more:hover {
+    border-color: rgba(255,255,255,0.25);
+    color: #888;
+}
+
+.ex-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.09);
+    border-radius: 99px;
+    padding: 3px 10px 3px 6px;
+    cursor: pointer;
+    font-size: 0.72rem;
+    font-family: var(--font-sans);
+    color: #c0c0c0;
+    transition: all 0.15s ease;
+    white-space: nowrap;
+}
+
+.ex-pill:hover {
+    background: rgba(255,255,255,0.1);
+    border-color: rgba(255,255,255,0.18);
+    color: #fff;
+}
+
+.ex-logo {
+    width: 15px;
+    height: 15px;
+    border-radius: 50%;
+    object-fit: cover;
+    flex-shrink: 0;
+}
+
+.ex-chosen {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.ex-pick {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    background: rgba(59,234,87,0.07);
+    border: 1px solid rgba(59,234,87,0.22);
+    border-radius: 99px;
+    padding: 3px 4px 3px 8px;
+    font-size: 0.72rem;
+    color: #d4d4d4;
+}
+
+.ex-clear {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(255,255,255,0.06);
+    border: 1px solid transparent;
+    border-radius: 50%;
+    width: 17px;
+    height: 17px;
+    color: #666;
+    cursor: pointer;
+    flex-shrink: 0;
+    transition: all 0.15s ease;
+    padding: 0;
+}
+
+.ex-clear:hover {
+    background: rgba(255,255,255,0.12);
+    color: #d4d4d4;
+}
+
+@media (hover: none) and (pointer: coarse) {
+    .fgrid label[data-tooltip]::before,
+    .fgrid label[data-tooltip]::after {
+        display: none;
+    }
+}
+
+@media (max-width: 600px) {
     body {
         padding: 16px 12px;
     }
 
+    .hdr {
+        padding: 14px 14px 12px;
+    }
+
+    .hdr > p {
+        font-size: 0.8rem;
+        line-height: 1.6;
+    }
+
+    .notice p {
+        font-size: 0.78rem;
+        line-height: 1.7;
+    }
+
+    form {
+        padding: 14px 12px;
+    }
+
     .fgrid {
         grid-template-columns: 1fr;
-        gap: 4px 0;
+        gap: 2px 0;
     }
 
     .fgrid label {
-        margin-top: 8px;
+        margin-top: 12px;
+        font-size: 0.75rem;
         white-space: normal;
     }
 
@@ -626,9 +865,14 @@ form input[type="checkbox"]:checked::after {
         display: none;
     }
 
-    form input[type="text"] {
+    form input[type="text"],
+    form input[type="number"],
+    form select {
         width: 100%;
         max-width: none;
+        min-height: 40px;
+        font-size: 14px;
+        padding: 8px 12px;
     }
 
     .drop,
@@ -636,22 +880,80 @@ form input[type="checkbox"]:checked::after {
         width: 100%;
     }
 
+    .drop-btn {
+        min-height: 40px;
+        font-size: 14px;
+    }
+
+    .drop-menu {
+        font-size: 0.85rem;
+    }
+
+    .drop-item {
+        padding: 10px 12px;
+        font-size: 0.82rem;
+    }
+
     form input[type="range"] {
         width: 100%;
     }
 
+    form input[type="checkbox"] {
+        width: 18px;
+        height: 18px;
+        border-radius: 5px;
+        flex-shrink: 0;
+    }
+
+    form input[type="checkbox"]:checked::after {
+        left: 5px;
+        top: 2px;
+        width: 4px;
+        height: 8px;
+    }
+
     .fbtns {
         flex-direction: column;
+        gap: 8px;
+        margin-top: 16px;
     }
 
     .fbtns button {
         width: 100%;
         justify-content: center;
+        min-height: 42px;
+        font-size: 14px;
+    }
+
+    .hint {
+        font-size: 0.72rem;
+    }
+
+    .usage {
+        font-size: 0.8rem;
+        padding: 14px;
+    }
+
+    .usage ul {
+        padding-left: 16px;
+    }
+
+    .u-note {
+        font-size: 0.74rem;
+        word-break: break-all;
+    }
+
+    .usage code {
+        word-break: break-all;
     }
 
     #logBox,
     #progWrap {
         width: 100%;
         box-sizing: border-box;
+    }
+
+    #logBox {
+        max-height: 320px;
     }
 }
