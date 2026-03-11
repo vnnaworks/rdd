@@ -329,6 +329,7 @@
         document.getElementById('exploitPills').style.display = '';
         document.getElementById('exploitChosen').style.display = 'none';
         document.getElementById('exploitChosenName').textContent = '';
+        try { localStorage.removeItem('lastExploit'); } catch(_) {}
         const spec = document.getElementById('btnSpecified');
         if (spec) spec.textContent = 'Download Specified';
         const bt = document.querySelector('#binDrop select')?.value;
