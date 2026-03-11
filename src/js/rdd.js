@@ -718,7 +718,7 @@ async function main() {
             const m = list.find(e => e.title.toLowerCase() === exploit.toLowerCase());
             if (m?.rbxversion) {
                 version = m.rbxversion;
-                log(`[*] Resolved exploit "${m.title}" → ${version}`);
+                log(`[*] Resolved exploit "${m.title}": ${version}`);
             } else {
                 log(`[!] Could not find exploit "${exploit}" or it has no version.`);
                 return;

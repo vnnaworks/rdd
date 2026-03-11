@@ -290,13 +290,23 @@
             });
 
             window.filterPlatform(document.getElementById('binaryType').value);
-            window._autoSelect?.();
+
+            let saved = null;
+            try { saved = localStorage.getItem('lastExploit'); } catch(_) {}
+
+            if (new URLSearchParams(location.search).get('exploit')) {
+                window._autoSelect?.();
+            } else if (saved) {
+                const m = list.find(e => e.title === saved);
+                if (m) window.selectExploit(m, m.slug?.logo || '');
+            }
         })
         .catch(() => {
             document.getElementById('exploitPills').innerHTML = '<span class="ex-hint">Failed to load exploits</span>';
         });
 
     window.selectExploit = function(e, logo) {
+        try { localStorage.setItem('lastExploit', e.title); } catch(_) {}
         document.getElementById('version').value = e.rbxversion || '';
         document.getElementById('versionLabel').style.display = 'none';
         document.getElementById('versionRow').style.display = 'none';
@@ -318,6 +328,7 @@
         document.getElementById('versionRow').style.display = '';
         document.getElementById('exploitPills').style.display = '';
         document.getElementById('exploitChosen').style.display = 'none';
+        document.getElementById('exploitChosenName').textContent = '';
         const spec = document.getElementById('btnSpecified');
         if (spec) spec.textContent = 'Download Specified';
         const bt = document.querySelector('#binDrop select')?.value;
