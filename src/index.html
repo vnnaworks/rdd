@@ -126,6 +126,14 @@
         </div>
     </div>
 
+    <div id="exModal" class="ex-modal" style="display:none">
+        <div class="ex-modal-card">
+            <p class="ex-modal-title" id="exModalTitle"></p>
+            <p class="ex-modal-msg" id="exModalMsg"></p>
+            <button type="button" class="ex-modal-ok" id="exModalOk">OK, got it</button>
+        </div>
+    </div>
+
     <div id="logBox"></div>
     <div id="progWrap">
         <div class="phdr">
@@ -153,10 +161,46 @@
 
     const p = location.hostname.split('.');
     p.shift();
-    const api = `${location.protocol}//${p.join('.')}/api/status/exploits`;
+    const base = `${location.protocol}//${p.join('.')}`;
 
-    fetch(api).then(r => r.json())
-        .then(data => {
+    const MODAL_COPY = {
+        stale: {
+            title: 'Outdated Exploit',
+            msg:   'This exploit requires the previous version of Roblox, it is currently outdated. It may still work, but if you receive Error Code 280 while joining a game, that version has been blocklisted by Roblox.',
+        },
+        old: {
+            title: 'Very Outdated Exploit',
+            msg:   'This exploit supports a version older than the previous Roblox release. Downgrading to it is unlikely to work right now, but you can still try. If you receive Error Code 280 while joining a game, that version has been blocklisted by Roblox.',
+        },
+    };
+
+    function showExModal(status, cb) {
+        const c = MODAL_COPY[status];
+        document.getElementById('exModalTitle').textContent = c.title;
+        document.getElementById('exModalMsg').textContent   = c.msg;
+        const modal = document.getElementById('exModal');
+        const ok    = document.getElementById('exModalOk');
+        modal.classList.remove('closing');
+        modal.style.display = 'flex';
+        const close = (then) => {
+            modal.classList.add('closing');
+            modal.addEventListener('animationend', () => {
+                modal.style.display = 'none';
+                modal.classList.remove('closing');
+                then?.();
+            }, { once: true });
+            ok.removeEventListener('click', onOk);
+        };
+        const onOk = () => close(cb);
+        ok.addEventListener('click', onOk);
+        modal.addEventListener('click', e => { if (e.target === modal) close(); }, { once: true });
+    }
+
+    Promise.all([
+        fetch(`${base}/api/status/exploits`).then(r => r.json()),
+        fetch(`${base}/api/versions/current`).then(r => r.json()).catch(() => null),
+        fetch(`${base}/api/versions/past`).then(r => r.json()).catch(() => null),
+    ]).then(([data, curr, past]) => {
             const wrap = document.getElementById('exploitPills');
             wrap.innerHTML = '';
 
@@ -170,6 +214,16 @@
             if (!list.length) {
                 wrap.innerHTML = '<span class="ex-hint">No exploits available</span>';
                 return;
+            }
+
+            function getStatus(e) {
+                const mac = e.extype === 'mexecutor';
+                const cv  = mac ? curr?.Mac : curr?.Windows;
+                const pv  = mac ? past?.Mac : past?.Windows;
+                if (!cv) return 'current';
+                if (e.rbxversion === cv) return 'current';
+                if (e.rbxversion === pv) return 'stale';
+                return 'old';
             }
 
             function collapse() {
@@ -213,11 +267,12 @@
             window._exps = list;
 
             list.forEach(e => {
-                const pill = document.createElement('button');
+                const pill   = document.createElement('button');
+                const status = getStatus(e);
+                const logo   = e.slug?.logo;
                 pill.type = 'button';
-                pill.className = 'ex-pill';
+                pill.className = 'ex-pill' + (status !== 'current' ? ` ex-pill--${status}` : '');
                 pill.dataset.extype = e.extype;
-                const logo = e.slug?.logo;
                 if (logo?.trim()) {
                     const img = document.createElement('img');
                     img.src = logo; img.className = 'ex-logo'; img.alt = '';
@@ -227,7 +282,10 @@
                 const span = document.createElement('span');
                 span.textContent = e.title;
                 pill.appendChild(span);
-                pill.onclick = () => window.selectExploit(e, logo);
+                pill.onclick = () => {
+                    const go = () => window.selectExploit(e, logo);
+                    status !== 'current' ? showExModal(status, go) : go();
+                };
                 wrap.appendChild(pill);
             });
 

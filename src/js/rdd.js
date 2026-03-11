@@ -194,10 +194,14 @@ function copyLink(btn) {
     navigator.clipboard.writeText(getLink());
     if (!btn || btn._copying) return;
     btn._copying = true;
-    const label = btn.lastChild;
-    label.textContent = ' Copied';
+    const orig = btn.innerHTML;
+    btn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> Copied!`;
+    btn.style.color       = 'var(--weao-green)';
+    btn.style.borderColor = 'rgba(59,234,87,0.3)';
+    btn.style.background  = 'rgba(59,234,87,0.07)';
     setTimeout(() => {
-        label.textContent = ' Copy Link';
+        btn.innerHTML = orig;
+        btn.style.color = btn.style.borderColor = btn.style.background = '';
         btn._copying = false;
     }, 2000);
 };
