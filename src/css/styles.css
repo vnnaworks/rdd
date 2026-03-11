@@ -767,6 +767,9 @@ form input[type="checkbox"]:checked::after {
     white-space: nowrap;
 }
 
+.ex-pill.plat-hide,
+.ex-pill.collapsed { display: none; }
+
 .ex-pill:hover {
     background: rgba(255,255,255,0.1);
     border-color: rgba(255,255,255,0.18);

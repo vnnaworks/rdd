@@ -217,7 +217,7 @@
             }
 
             function getStatus(e) {
-                const mac = e.extype === 'mexecutor';
+                const mac = e.platform === 'Mac';
                 const cv  = mac ? curr?.Mac : curr?.Windows;
                 const pv  = mac ? past?.Mac : past?.Windows;
                 if (!cv) return 'current';
@@ -228,19 +228,16 @@
 
             function collapse() {
                 wrap.querySelector('.ex-more')?.remove();
-                wrap.querySelectorAll('.ex-pill.collapsed').forEach(p => {
-                    p.classList.remove('collapsed');
-                    p.style.display = '';
-                });
-                const vis = Array.from(wrap.querySelectorAll('.ex-pill')).filter(p => p.style.display !== 'none');
+                wrap.querySelectorAll('.ex-pill.collapsed').forEach(p => p.classList.remove('collapsed'));
+                const vis = Array.from(wrap.querySelectorAll('.ex-pill:not(.plat-hide)'));
                 if (vis.length <= LIMIT) return;
-                vis.slice(LIMIT).forEach(p => { p.classList.add('collapsed'); p.style.display = 'none'; });
+                vis.slice(LIMIT).forEach(p => p.classList.add('collapsed'));
                 const btn = document.createElement('button');
                 btn.type = 'button';
                 btn.className = 'ex-more';
                 btn.textContent = `+${vis.length - LIMIT} more`;
                 btn.onclick = () => {
-                    wrap.querySelectorAll('.ex-pill.collapsed').forEach(p => { p.classList.remove('collapsed'); p.style.display = ''; });
+                    wrap.querySelectorAll('.ex-pill.collapsed').forEach(p => p.classList.remove('collapsed'));
                     btn.remove();
                 };
                 wrap.appendChild(btn);
@@ -259,7 +256,7 @@
                     hint.style.fontWeight = studio ? '500' : '';
                 }
                 wrap.querySelectorAll('.ex-pill').forEach(p => {
-                    p.style.display = (mac ? p.dataset.extype === 'mexecutor' : p.dataset.extype !== 'mexecutor') ? '' : 'none';
+                    p.classList.toggle('plat-hide', mac ? p.dataset.platform !== 'Mac' : p.dataset.platform === 'Mac');
                 });
                 collapse();
             };
@@ -272,7 +269,8 @@
                 const logo   = e.slug?.logo;
                 pill.type = 'button';
                 pill.className = 'ex-pill' + (status !== 'current' ? ` ex-pill--${status}` : '');
-                pill.dataset.extype = e.extype;
+                pill.dataset.extype    = e.extype;
+                pill.dataset.platform  = e.platform || '';
                 if (logo?.trim()) {
                     const img = document.createElement('img');
                     img.src = logo; img.className = 'ex-logo'; img.alt = '';

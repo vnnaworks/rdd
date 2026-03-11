@@ -189,7 +189,16 @@ function getLink() {
     return basePath + qs;
 };
 
-function dlHash() { window.open(getLink(), "_blank"); };
+function dlHash() {
+    const studioTypes = new Set(['WindowsStudio64', 'MacStudio']);
+    if (studioTypes.has(form.binaryType.value) && !form.version.value.trim()) {
+        log("[!] Error: A version hash is required for Studio binary types.");
+        logBox.style.display = 'flex';
+        scrollEnd();
+        return;
+    }
+    window.open(getLink(), "_blank");
+};
 function copyLink(btn) {
     navigator.clipboard.writeText(getLink());
     if (!btn || btn._copying) return;
@@ -772,6 +781,7 @@ async function fetchManifest() {
         log(`[+] (Please wait!) Downloading ${outputFileName}..`, "");
 
         setProgress(0, `Starting download for ${zipFileName}...`);
+        const _startTime = Date.now();
         xhrBin(versionPath + zipFileName, function (zipData) {
             const elapsed = ((Date.now() - _startTime) / 1000).toFixed(1);
             log(`done! Completed in ${elapsed}s`);
