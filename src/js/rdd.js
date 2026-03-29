@@ -294,10 +294,16 @@ async function dlPrev() {
         }
 
         let queryString = `?channel=${encodeURIComponent(channelName)}&binaryType=${encodeURIComponent(binaryType)}&version=${encodeURIComponent(versionHash)}`;
+
         const compressZip = form.compressZip.checked;
         const compressionLevel = form.compressionLevel.value;
         if (compressZip === true) {
             queryString += `&compressZip=true&compressionLevel=${compressionLevel}`;
+        }
+
+        const includeLauncher = form.includeLauncher.checked;
+        if (includeLauncher === true) {
+            queryString += `&includeLauncher=true`;
         }
 
         queryString += `&parallelDownloads=${form.parallelDownloads.checked}`;
@@ -309,7 +315,6 @@ async function dlPrev() {
         logWarpHint();
     }
 }
-
 
 function scrollEnd() {
     logBox.scrollTop = logBox.scrollHeight;
