@@ -39,82 +39,82 @@ const usageMsg = `[*] USAGE: ${basePath}?channel=<CHANNEL_NAME>&binaryType=<BINA
 `;
 
 // const hostPath = "https://r2.weao.xyz"; // We replaced Roblox's S3 with our own R2 bucket to avoid CORS issues, seems to work! (this is now only a backup rdd was fixed)
-const hostPath = "https://setup-aws.rbxcdn.com";
+const hostPath = "https://setup-aws.rbxcdn.com"; 
 // Root extract locations for the Win manifests
-const extractRoots = {  
-    player: {    
-        "RobloxApp.zip": "",
-            "redist.zip": "",
-            "shaders.zip": "shaders/",
-            "ssl.zip": "ssl/",
+const extractRoots = {
+    player: {
+        "RobloxApp.zip": "",
+        "redist.zip": "",
+        "shaders.zip": "shaders/",
+        "ssl.zip": "ssl/",
 
-            "WebView2.zip": "",
-            "WebView2RuntimeInstaller.zip": "WebView2RuntimeInstaller/",
+        "WebView2.zip": "",
+        "WebView2RuntimeInstaller.zip": "WebView2RuntimeInstaller/",
 
-            "content-avatar.zip": "content/avatar/",
-            "content-configs.zip": "content/configs/",
-            "content-fonts.zip": "content/fonts/",
-            "content-sky.zip": "content/sky/",
-            "content-sounds.zip": "content/sounds/",
-            "content-textures2.zip": "content/textures/",
-            "content-models.zip": "content/models/",
+        "content-avatar.zip": "content/avatar/",
+        "content-configs.zip": "content/configs/",
+        "content-fonts.zip": "content/fonts/",
+        "content-sky.zip": "content/sky/",
+        "content-sounds.zip": "content/sounds/",
+        "content-textures2.zip": "content/textures/",
+        "content-models.zip": "content/models/",
 
-            "content-platform-fonts.zip": "PlatformContent/pc/fonts/",
-            "content-platform-dictionaries.zip": "PlatformContent/pc/shared_compression_dictionaries/",
-            "content-terrain.zip": "PlatformContent/pc/terrain/",
-            "content-textures3.zip": "PlatformContent/pc/textures/",
+        "content-platform-fonts.zip": "PlatformContent/pc/fonts/",
+        "content-platform-dictionaries.zip": "PlatformContent/pc/shared_compression_dictionaries/",
+        "content-terrain.zip": "PlatformContent/pc/terrain/",
+        "content-textures3.zip": "PlatformContent/pc/textures/",
 
-            "extracontent-luapackages.zip": "ExtraContent/LuaPackages/",
-            "extracontent-translations.zip": "ExtraContent/translations/",
-            "extracontent-models.zip": "ExtraContent/models/",
-            "extracontent-textures.zip": "ExtraContent/textures/",
-            "extracontent-places.zip": "ExtraContent/places/"  
-    },
+        "extracontent-luapackages.zip": "ExtraContent/LuaPackages/",
+        "extracontent-translations.zip": "ExtraContent/translations/",
+        "extracontent-models.zip": "ExtraContent/models/",
+        "extracontent-textures.zip": "ExtraContent/textures/",
+        "extracontent-places.zip": "ExtraContent/places/"
+    },
 
-      studio: {    
-        "RobloxStudio.zip": "",
-            "RibbonConfig.zip": "RibbonConfig/",
-            "redist.zip": "",
-            "Libraries.zip": "",
-            "LibrariesQt5.zip": "",
+    studio: {
+        "RobloxStudio.zip": "",
+        "RibbonConfig.zip": "RibbonConfig/",
+        "redist.zip": "",
+        "Libraries.zip": "",
+        "LibrariesQt5.zip": "",
 
-            "WebView2.zip": "",
-            "WebView2RuntimeInstaller.zip": "",
+        "WebView2.zip": "",
+        "WebView2RuntimeInstaller.zip": "",
 
-            "shaders.zip": "shaders/",
-            "ssl.zip": "ssl/",
+        "shaders.zip": "shaders/",
+        "ssl.zip": "ssl/",
 
-            "Qml.zip": "Qml/",
-            "Plugins.zip": "Plugins/",
-            "StudioFonts.zip": "StudioFonts/",
-            "BuiltInPlugins.zip": "BuiltInPlugins/",
-            "ApplicationConfig.zip": "ApplicationConfig/",
-            "BuiltInStandalonePlugins.zip": "BuiltInStandalonePlugins/",
+        "Qml.zip": "Qml/",
+        "Plugins.zip": "Plugins/",
+        "StudioFonts.zip": "StudioFonts/",
+        "BuiltInPlugins.zip": "BuiltInPlugins/",
+        "ApplicationConfig.zip": "ApplicationConfig/",
+        "BuiltInStandalonePlugins.zip": "BuiltInStandalonePlugins/",
 
-            "content-qt_translations.zip": "content/qt_translations/",
-            "content-sky.zip": "content/sky/",
-            "content-fonts.zip": "content/fonts/",
-            "content-avatar.zip": "content/avatar/",
-            "content-models.zip": "content/models/",
-            "content-sounds.zip": "content/sounds/",
-            "content-configs.zip": "content/configs/",
-            "content-api-docs.zip": "content/api_docs/",
-            "content-textures2.zip": "content/textures/",
-            "content-studio_svg_textures.zip": "content/studio_svg_textures/",
+        "content-qt_translations.zip": "content/qt_translations/",
+        "content-sky.zip": "content/sky/",
+        "content-fonts.zip": "content/fonts/",
+        "content-avatar.zip": "content/avatar/",
+        "content-models.zip": "content/models/",
+        "content-sounds.zip": "content/sounds/",
+        "content-configs.zip": "content/configs/",
+        "content-api-docs.zip": "content/api_docs/",
+        "content-textures2.zip": "content/textures/",
+        "content-studio_svg_textures.zip": "content/studio_svg_textures/",
 
-            "content-platform-fonts.zip": "PlatformContent/pc/fonts/",
-            "content-platform-dictionaries.zip": "PlatformContent/pc/shared_compression_dictionaries/",
-            "content-terrain.zip": "PlatformContent/pc/terrain/",
-            "content-textures3.zip": "PlatformContent/pc/textures/",
+        "content-platform-fonts.zip": "PlatformContent/pc/fonts/",
+        "content-platform-dictionaries.zip": "PlatformContent/pc/shared_compression_dictionaries/",
+        "content-terrain.zip": "PlatformContent/pc/terrain/",
+        "content-textures3.zip": "PlatformContent/pc/textures/",
 
-            "extracontent-translations.zip": "ExtraContent/translations/",
-            "extracontent-luapackages.zip": "ExtraContent/LuaPackages/",
-            "extracontent-textures.zip": "ExtraContent/textures/",
-            "extracontent-scripts.zip": "ExtraContent/scripts/",
-            "extracontent-models.zip": "ExtraContent/models/",
+        "extracontent-translations.zip": "ExtraContent/translations/",
+        "extracontent-luapackages.zip": "ExtraContent/LuaPackages/",
+        "extracontent-textures.zip": "ExtraContent/textures/",
+        "extracontent-scripts.zip": "ExtraContent/scripts/",
+        "extracontent-models.zip": "ExtraContent/models/",
         "studiocontent-models.zip": "StudioContent/models/",
-        "studiocontent-textures.zip": "StudioContent/textures/"  
-    }
+        "studiocontent-textures.zip": "StudioContent/textures/"
+    }
 };
 
 // Yes, these files on S3 are meant for "legacy bootstrappers", but they work great
@@ -195,16 +195,15 @@ function dlHash() {
     }
     window.open(getLink(), "_blank");
 };
-
 function copyLink(btn) {
     navigator.clipboard.writeText(getLink());
     if (!btn || btn._copying) return;
     btn._copying = true;
     const orig = btn.innerHTML;
     btn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> Copied!`;
-    btn.style.color = 'var(--weao-green)';
+    btn.style.color       = 'var(--weao-green)';
     btn.style.borderColor = 'rgba(59,234,87,0.3)';
-    btn.style.background = 'rgba(59,234,87,0.07)';
+    btn.style.background  = 'rgba(59,234,87,0.07)';
     setTimeout(() => {
         btn.innerHTML = orig;
         btn.style.color = btn.style.borderColor = btn.style.background = '';
@@ -212,63 +211,61 @@ function copyLink(btn) {
     }, 2000);
 };
 
-async function fetchVersionInfo(url) {  
-    const response = await fetch(url);  
-    if (!response.ok) {    
-        throw new Error(`HTTP error! status: ${response.status}`);  
-    }  
-    return await response.json();
+async function fetchVersionInfo(url) {
+    const response = await fetch(url);
+    if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    return await response.json();
 }
 
 async function dlLatest() { // Easy button to download the latest version of a binary! 
-      
-    const binaryType = form.binaryType.value;  
-    const channelName = form.channel.value.trim() || form.channel.placeholder;  
-    let versionHash;
+    const binaryType = form.binaryType.value;
+    const channelName = form.channel.value.trim() || form.channel.placeholder;
+    let versionHash;
 
-      
-    try {
-        const currentDomain = window.location.hostname;
+    try {
+    const currentDomain = window.location.hostname;
 
-        const parts = currentDomain.split(".");
-        const domain = parts.length > 2 ? parts.slice(-2).join(".") : currentDomain;
+    const parts = currentDomain.split(".");
+    const domain = parts.length > 2 ? parts.slice(-2).join(".") : currentDomain;
+        
+    const apiUrl = `https://${domain}/api/versions/current`;
 
-        const apiUrl = `https://${domain}/api/versions/current`;
+    const data = await fetchVersionInfo(apiUrl);
 
-        const data = await fetchVersionInfo(apiUrl);
-
-        if (binaryType === "WindowsPlayer" || binaryType === "WindowsStudio64") {
-            versionHash = data.Windows;
-        } else if (binaryType === "MacPlayer" || binaryType === "MacStudio") {
-            versionHash = data.Mac;
-        } else {
-            log("[!] Error: Unknown binary type for latest version download.");
-            return;
-        }
-
-        let queryString = `?channel=${encodeURIComponent(channelName)}&binaryType=${encodeURIComponent(binaryType)}&version=${encodeURIComponent(versionHash)}`;
-        const compressZip = form.compressZip.checked;
-        const compressionLevel = form.compressionLevel.value;
-        if (compressZip === true) {
-            queryString += `&compressZip=true&compressionLevel=${compressionLevel}`;
-        }
-
-        const includeLauncher = form.includeLauncher.checked;
-        if (includeLauncher === true) {
-            queryString += `&includeLauncher=true`;
-        }
-
-        queryString += `&parallelDownloads=${form.parallelDownloads.checked}`;
-
-        window.open(basePath + queryString, "_blank");
-
-    } catch (error) {
-        log(`[!] Error fetching latest version: ${error.message}`);
-        logWarpHint();
+    if (binaryType === "WindowsPlayer" || binaryType === "WindowsStudio64") {
+        versionHash = data.Windows;
+    } else if (binaryType === "MacPlayer" || binaryType === "MacStudio") {
+        versionHash = data.Mac;
+    } else {
+        log("[!] Error: Unknown binary type for latest version download.");
+        return;
     }
+
+    let queryString = `?channel=${encodeURIComponent(channelName)}&binaryType=${encodeURIComponent(binaryType)}&version=${encodeURIComponent(versionHash)}`;
+    const compressZip = form.compressZip.checked;
+    const compressionLevel = form.compressionLevel.value;
+    if (compressZip === true) {
+        queryString += `&compressZip=true&compressionLevel=${compressionLevel}`;
+    }
+
+    const includeLauncher = form.includeLauncher.checked;
+    if (includeLauncher === true) {
+        queryString += `&includeLauncher=true`;
+    }
+
+    queryString += `&parallelDownloads=${form.parallelDownloads.checked}`;
+
+    window.open(basePath + queryString, "_blank");
+
+} catch (error) {
+    log(`[!] Error fetching latest version: ${error.message}`);
+    logWarpHint();
+}
 }
 
-async function dlPrev() {
+async function dlPrev() { 
     // Helps restart swift users to downgrade to exploit :sob: 
     const binaryType = form.binaryType.value;
     const channelName = form.channel.value.trim() || form.channel.placeholder;
@@ -319,8 +316,15 @@ function scrollEnd() {
     logBox.scrollTop = logBox.scrollHeight;
 };
 
-function escHtml(originalText) {  
-    return originalText    .replace(/&/g, "&amp;")    .replace(/</g, "&lt;")    .replace(/>/g, "&gt;")    .replace(/"/g, "&quot;")    .replace(/'/g, "&#039;")    .replace(/ /g, "&nbsp;")    .replace(/\n/g, "<br>");
+function escHtml(originalText) {
+    return originalText
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;")
+        .replace(/ /g, "&nbsp;")
+        .replace(/\n/g, "<br>");
 };
 
 function log(msg = "", end = "\n", autoScroll = true) {
@@ -332,22 +336,13 @@ function log(msg = "", end = "\n", autoScroll = true) {
 
     let type = "l-def";
     let text = content;
-    if (content.startsWith("[!]")) {
-        type = "l-err";
-        text = content.slice(3).trim();
-    } else if (content.startsWith("[+]")) {
-        type = "l-ok";
-        text = content.slice(3).trim();
-    } else if (content.startsWith("[*]")) {
-        type = "l-info";
-        text = content.slice(3).trim();
-    }
+    if (content.startsWith("[!]")) { type = "l-err";  text = content.slice(3).trim(); }
+    else if (content.startsWith("[+]")) { type = "l-ok";   text = content.slice(3).trim(); }
+    else if (content.startsWith("[*]")) { type = "l-info"; text = content.slice(3).trim(); }
     entry.classList.add(type);
 
     const now = new Date();
-    const time = now.toLocaleTimeString("en-US", {
-        hour12: false
-    });
+    const time = now.toLocaleTimeString("en-US", { hour12: false });
 
     const badge = document.createElement("span");
     badge.className = "badge";
@@ -371,9 +366,7 @@ function logWarpHint() {
 
     const badge = document.createElement("span");
     badge.className = "badge";
-    badge.textContent = new Date().toLocaleTimeString("en-US", {
-        hour12: false
-    });
+    badge.textContent = new Date().toLocaleTimeString("en-US", { hour12: false });
 
     const msg = document.createElement("span");
     msg.className = "msg";
@@ -394,9 +387,7 @@ function logLink(url, autoScroll = true) {
 
     const badge = document.createElement("span");
     badge.className = "badge";
-    badge.textContent = now.toLocaleTimeString("en-US", {
-        hour12: false
-    });
+    badge.textContent = now.toLocaleTimeString("en-US", { hour12: false });
 
     const link = document.createElement("a");
     link.href = url;
@@ -454,9 +445,7 @@ function hideProgress() {
 
 // Prompt download
 function saveFile(fileName, data, mimeType = "application/zip") {
-    const blob = new Blob([data], {
-        type: mimeType
-    });
+    const blob = new Blob([data], { type: mimeType });
 
     let link = document.createElement("a");
     link.href = URL.createObjectURL(blob);
@@ -477,39 +466,34 @@ function saveFile(fileName, data, mimeType = "application/zip") {
 };
 
 // Soley for the manifest etc
-function request(url, callback, errorOnNotOk = true) {  
-    const httpRequest = new XMLHttpRequest();  
-    httpRequest.open("GET", url, true);
+function request(url, callback, errorOnNotOk = true) {
+    const httpRequest = new XMLHttpRequest();
+    httpRequest.open("GET", url, true);
 
-       // When the request is done later..
-      
-    httpRequest.onload = function() {     // Handle req issues, and don't call-back
-            
-        const statusCode = httpRequest.status    
-        if (errorOnNotOk && (statusCode < 200 || statusCode >= 400)) {      
-            log(`[!] Request error (${statusCode}) @ ${url} - ${httpRequest.responseText}`);      
-            return;    
-        }
+    // When the request is done later..
+    httpRequest.onload = function () {
+        // Handle req issues, and don't call-back
+        const statusCode = httpRequest.status
+        if (errorOnNotOk && (statusCode < 200 || statusCode >= 400)) {
+            log(`[!] Request error (${statusCode}) @ ${url} - ${httpRequest.responseText}`);
+            return;
+        }
 
-            
-        callback(httpRequest.responseText, statusCode);  
-    };
+        callback(httpRequest.responseText, statusCode);
+    };
 
-      
-    httpRequest.onerror = function(e) {    
-        log(`[!] Request error @ ${url}`);  
-    };
+    httpRequest.onerror = function (e) {
+        log(`[!] Request error @ ${url}`);
+    };
 
-      
-    httpRequest.send();
+    httpRequest.send();
 };
 
-function xhrBin(url, callback, progressCallback = null) {  
-    const httpRequest = new XMLHttpRequest();
+function xhrBin(url, callback, progressCallback = null) {
+    const httpRequest = new XMLHttpRequest();
 
-      
-    httpRequest.open("GET", url, true);  
-    httpRequest.responseType = "arraybuffer";
+    httpRequest.open("GET", url, true);
+    httpRequest.responseType = "arraybuffer";
 
     if (progressCallback) {
         httpRequest.onprogress = function(event) {
@@ -520,31 +504,27 @@ function xhrBin(url, callback, progressCallback = null) {  
         };
     }
 
-       // When the request is done later..
-      
-    httpRequest.onload = function() {     // Handle req issues, and don't call-back
-            
-        const statusCode = httpRequest.status    
-        if (statusCode != 200) {      
-            log(`[!] Binary request error (${statusCode}) @ ${url}`);      
-            return;    
-        }
+    // When the request is done later..
+    httpRequest.onload = function () {
+        // Handle req issues, and don't call-back
+        const statusCode = httpRequest.status
+        if (statusCode != 200) {
+            log(`[!] Binary request error (${statusCode}) @ ${url}`);
+            return;
+        }
 
-            
-        const arrayBuffer = httpRequest.response;    
-        if (!arrayBuffer) {      
-            log(`[!] Binary request error (${statusCode}) @ ${url} - Failed to get binary ArrayBuffer from response`);      
-            return;    
-        }
+        const arrayBuffer = httpRequest.response;
+        if (!arrayBuffer) {
+            log(`[!] Binary request error (${statusCode}) @ ${url} - Failed to get binary ArrayBuffer from response`);
+            return;
+        }
 
-            
-        callback(arrayBuffer, statusCode);  
-    };
+        callback(arrayBuffer, statusCode);
+    };
 
-      
-    httpRequest.onerror = function(e) {    
-        log(`[!] Binary request error @ ${url} - ${e}`);  
-    };
+    httpRequest.onerror = function (e) {
+        log(`[!] Binary request error @ ${url} - ${e}`);
+    };
 
     httpRequest.send();
 };
@@ -554,7 +534,6 @@ function fetchBin(url, progressCallback = null) {
         const httpRequest = new XMLHttpRequest();
         httpRequest.open("GET", url, true);
         httpRequest.responseType = "arraybuffer";
-        httpRequest.timeout = 30000;
 
         if (progressCallback) {
             httpRequest.onprogress = function(event) {
@@ -569,38 +548,27 @@ function fetchBin(url, progressCallback = null) {
                 reject(new Error(`HTTP ${httpRequest.status}`));
                 return;
             }
-
             if (!httpRequest.response) {
                 reject(new Error("No ArrayBuffer in response"));
                 return;
             }
-
             resolve(httpRequest.response);
         };
 
         httpRequest.onerror = function() {
-            reject(new Error("Network error / blocked request"));
-        };
-
-        httpRequest.ontimeout = function() {
-            reject(new Error("Request timed out"));
-        };
-
-        httpRequest.onabort = function() {
-            reject(new Error("Request aborted"));
+            reject(new Error("Network error"));
         };
 
         httpRequest.send();
     });
-}
+};
 
-function getQuery(queryString) {  
-    if (!urlParams.has(queryString)) {    
-        return null;  
-    }
+function getQuery(queryString) {
+    if (!urlParams.has(queryString)) {
+        return null;
+    }
 
-      
-    return urlParams.get(queryString) || null;
+    return urlParams.get(queryString) || null;
 };
 
 let channel = getQuery("channel");
@@ -631,7 +599,7 @@ async function main() {
         return;
     }
 
-       // Query params
+    // Query params
 
     if (channel) {
         if (channel.toLowerCase() === "live" || channel.toLowerCase() === "production") {
@@ -643,102 +611,87 @@ async function main() {
         channel = "LIVE";
     }
 
-      
-    if (channel === "LIVE") {    
-        channelPath = `${hostPath}`;  
-    } else {    
-        channelPath = `${hostPath}/channel/${channel}`;  
-    }
+    if (channel === "LIVE") {
+        channelPath = `${hostPath}`;
+    } else {
+        channelPath = `${hostPath}/channel/${channel}`;
+    }
 
-      
-    if (version) {    
-        version = version.toLowerCase();    
-        if (!version.startsWith("version-")) { // Only the version GUID is actually necessary
-                  
-            version = "version-" + version    
-        }  
-    }
+    if (version) {
+        version = version.toLowerCase();
+        if (!version.startsWith("version-")) { // Only the version GUID is actually necessary
+            version = "version-" + version
+        }
+    }
 
 
-       // We're also checking to make sure blobDir hasn't been included too for the compatibility warning later
-      
-    if (version && !binaryType) {    
-        log("[!] Error: If you provide a specific `version`, you need to set the `binaryType` aswell! See the usage doc below for examples of various `binaryType` inputs:", "\n\n");    
-        log(usageMsg, "\n", false);    
-        return;  
-    }
+    // We're also checking to make sure blobDir hasn't been included too for the compatibility warning later
+    if (version && !binaryType) {
+        log("[!] Error: If you provide a specific `version`, you need to set the `binaryType` aswell! See the usage doc below for examples of various `binaryType` inputs:", "\n\n");
+        log(usageMsg, "\n", false);
+        return;
+    }
 
-      
-    if (blobDir) {    
-        if (blobDir.slice(0) !== "/") {      
-            blobDir = "/" + blobDir;    
-        }    
-        if (blobDir.slice(-1) !== "/") {      
-            blobDir += "/"    
-        }
+    if (blobDir) {
+        if (blobDir.slice(0) !== "/") {
+            blobDir = "/" + blobDir;
+        }
+        if (blobDir.slice(-1) !== "/") {
+            blobDir += "/"
+        }
 
-             // We used to support usage of ONLY `blobDir` & `version` in the past, requiring us
-             // to essentially "guess" the desired binaryType ourselves! (how fun, right!?)
-            
-        if (!binaryType) {      
-            log(`[!] Error: Using the \`blobDir\` query without defining \`binaryType\` has been
+        // We used to support usage of ONLY `blobDir` & `version` in the past, requiring us
+        // to essentially "guess" the desired binaryType ourselves! (how fun, right!?)
+        if (!binaryType) {
+            log(`[!] Error: Using the \`blobDir\` query without defining \`binaryType\` has been
     deprecated, and can no longer be used in requests. If you were using \`blobDir\`
     explicitly for MacPlayer/MacStudio with "blobDir=mac" or "/mac", please replace
     blobDir with a \`binaryType\` of either MacPlayer or MacStudio respectively`, "\n\n");
 
-                  
-            log(usageMsg, "\n", false);      
-            return;    
-        }  
-    }
+            log(usageMsg, "\n", false);
+            return;
+        }
+    }
 
-      
-    if (compressZip) {    
-        if (compressZip !== "true" && compressZip !== "false") {      
-            log(`[!] Error: The \`compressZip\` query must be a boolean ("true" or "false"), got "${compressZip}"`);    
-        }
+    if (compressZip) {
+        if (compressZip !== "true" && compressZip !== "false") {
+            log(`[!] Error: The \`compressZip\` query must be a boolean ("true" or "false"), got "${compressZip}"`);
+        }
 
-            
-        compressZip = (compressZip === "true");  
-    } else {    
-        compressZip = form.compressZip.checked;  
-    }
+        compressZip = (compressZip === "true");
+    } else {
+        compressZip = form.compressZip.checked;
+    }
 
-      
-    if (compressionLevel !== "") {    
-        try {      
-            compressionLevel = parseInt(compressionLevel);    
-        } catch (err) {      
-            log(`[!] Error: Failed to parse \`compressionLevel\` query: ${error}`, "\n\n");      
-            log(usageMsg, "\n", false);      
-            return;    
-        }
+    if (compressionLevel !== "") {
+        try {
+            compressionLevel = parseInt(compressionLevel);
+        } catch (err) {
+            log(`[!] Error: Failed to parse \`compressionLevel\` query: ${error}`, "\n\n");
+            log(usageMsg, "\n", false);
+            return;
+        }
 
-            
-        if (compressionLevel > 9 || compressionLevel < 1) {      
-            log(`[!] Error: The \`compressionLevel\` query must be a value between 1 and 9, got ${compressionLevel}`, "\n\n");      
-            log(usageMsg, "\n", false);      
-            return;    
-        }  
-    } else {    
-        compressionLevel = form.compressionLevel.value; // Only applies to when `compressZip` is true aswell
-          
-    }
+        if (compressionLevel > 9 || compressionLevel < 1) {
+            log(`[!] Error: The \`compressionLevel\` query must be a value between 1 and 9, got ${compressionLevel}`, "\n\n");
+            log(usageMsg, "\n", false);
+            return;
+        }
+    } else {
+        compressionLevel = form.compressionLevel.value; // Only applies to when `compressZip` is true aswell
+    }
 
-      
-    if (includeLauncher) {    
-        if (includeLauncher !== "true" && includeLauncher !== "false") {      
-            log(`[!] Error: The \`includeLauncher\` query must be a boolean ("true" or "false"), got "${includeLauncher}"`);      
-            return;    
-        }
+    if (includeLauncher) {
+        if (includeLauncher !== "true" && includeLauncher !== "false") {
+            log(`[!] Error: The \`includeLauncher\` query must be a boolean ("true" or "false"), got "${includeLauncher}"`);
+            return;
+        }
 
-            
-        includeLauncher = (includeLauncher === "true");  
-    } else {
-
-            
-        includeLauncher = false;  
-    }
+        includeLauncher = (includeLauncher === "true");
+    } else {
+ 
+        includeLauncher = false;
+    }
 
     // At this point, we expect `binaryType` to be defined if all is well on input from the user..
     if (!binaryType) {
@@ -752,23 +705,20 @@ async function main() {
         return;
     }
 
-      
-    let versionFilePath; // Only used if `version` isn't already defined (later, see code below the if-else after this)
-      
-    if (binaryType in binaryTypes) {    
-        const binaryTypeObject = binaryTypes[binaryType];    
-        versionFilePath = channelPath + binaryTypeObject.versionFile;
+    let versionFilePath; // Only used if `version` isn't already defined (later, see code below the if-else after this)
+    if (binaryType in binaryTypes) {
+        const binaryTypeObject = binaryTypes[binaryType];
+        versionFilePath = channelPath + binaryTypeObject.versionFile;
 
-             // If `blobDir` has already been defined by the user, we don't want to override it here..
-            
-        if (!blobDir) {      
-            blobDir = binaryTypeObject.blobDir;    
-        }  
-    } else {    
-        log(`[!] Error: \`binaryType\` given, "${binaryType}" not supported. See list below for supported \`binaryType\` inputs:`, "\n\n");    
-        log(usageMsg);    
-        return;  
-    }
+        // If `blobDir` has already been defined by the user, we don't want to override it here..
+        if (!blobDir) {
+            blobDir = binaryTypeObject.blobDir;
+        }
+    } else {
+        log(`[!] Error: \`binaryType\` given, "${binaryType}" not supported. See list below for supported \`binaryType\` inputs:`, "\n\n");
+        log(usageMsg);
+        return;
+    }
 
     if (exploit && !version) {
         try {
@@ -820,7 +770,8 @@ async function main() {
     }
 };
 
-async function fetchManifest() {   // versionPath = `${channelPath}${blobDir}${version}/`; // WEAO's R2 uses a / instead of - for the path :)
+async function fetchManifest() {
+   // versionPath = `${channelPath}${blobDir}${version}/`; // WEAO's R2 uses a / instead of - for the path :)
     versionPath = `${channelPath}${blobDir}${version}-`; // aws s3 uses a - for the path :)
 
     if (binaryType === "MacPlayer" || binaryType === "MacStudio") {
@@ -832,7 +783,7 @@ async function fetchManifest() {   // versionPath = `${channelPath}${blobDir}$
 
         setProgress(0, `Starting download for ${zipFileName}...`);
         const _startTime = Date.now();
-        xhrBin(versionPath + zipFileName, function(zipData) {
+        xhrBin(versionPath + zipFileName, function (zipData) {
             const elapsed = ((Date.now() - _startTime) / 1000).toFixed(1);
             log(`done! Completed in ${elapsed}s`);
             log("Thank you for using WEAO RDD! If you have any issues, please report them at our discord server: https://discord.gg/weaoxyz");
@@ -841,15 +792,14 @@ async function fetchManifest() {   // versionPath = `${channelPath}${blobDir}$
         }, function(percentage, loaded, total) {
             setProgress(percentage, `Downloading ${zipFileName}: ${fmtBytes(loaded)} / ${fmtBytes(total)}`);
         });
-    } else {    
-        log(`[+] Fetching rbxPkgManifest for ${version}@${channel}..`);
+    } else {
+        log(`[+] Fetching rbxPkgManifest for ${version}@${channel}..`);
 
-             // TODO: We dont support RDDs /common but should work fine since its our own R2 bucket lol?
-            
-        var manifestBody = "";    
-        try {      
-            const resp = await fetch(versionPath + "rbxPkgManifest.txt");      
-            if (!resp.ok) {
+        // TODO: We dont support RDDs /common but should work fine since its our own R2 bucket lol?
+        var manifestBody = "";
+        try {
+            const resp = await fetch(versionPath + "rbxPkgManifest.txt");
+            if (!resp.ok) {
                 if (resp.status === 404) {
                     log("[!] Oh no! It seems this version has vanished like a ghost... 👻");
                     log("    We haven't cached this version yet.");
@@ -857,19 +807,19 @@ async function fetchManifest() {   // versionPath = `${channelPath}${blobDir}$
                     log("    Try again after 1-10 minutes!");
                 } else {
                     log(`[!] Failed to fetch rbxPkgManifest: (status: ${resp.status}, err: ${(await resp.text()) || "<failed to get response from server>"})`);
-                }        
-                return;      
-            }      
-            manifestBody = await resp.text();
+                }
+                return;
+            }
+            manifestBody = await resp.text();
         } catch (error) {
             log(`[!] An error occurred while fetching rbxPkgManifest: ${error.message}`);
-            logWarpHint();      
-            return;    
-        }
+            logWarpHint();
+            return;
+        }
 
         const useParallel = parallelDownloads !== "false";
-        dlPackages(manifestBody, useParallel);  
-    }
+        dlPackages(manifestBody, useParallel);
+    }
 };
 
 async function dlPackages(manifestBody, useParallel = form.parallelDownloads.checked) {
@@ -919,7 +869,7 @@ async function dlPackages(manifestBody, useParallel = form.parallelDownloads.che
         } else {
             log(`[+] Extracting "${packageName}"...`);
             const extractRootFolder = binExtractRoots[packageName];
-            await JSZip.loadAsync(blobData).then(async(packageZip) => {
+            await JSZip.loadAsync(blobData).then(async (packageZip) => {
                 blobData = null;
                 const fileGetPromises = [];
                 packageZip.forEach((path, object) => {
@@ -938,13 +888,11 @@ async function dlPackages(manifestBody, useParallel = form.parallelDownloads.che
 
     if (useParallel) {
         const progressMap = {};
-
         function syncProgress() {
-            let totalLoaded = 0,
-                totalSize = 0;
+            let totalLoaded = 0, totalSize = 0;
             for (const key in progressMap) {
                 totalLoaded += progressMap[key].loaded;
-                totalSize += progressMap[key].total;
+                totalSize  += progressMap[key].total;
             }
             if (totalSize > 0) {
                 const pct = Math.round((totalLoaded / totalSize) * 100);
@@ -954,23 +902,13 @@ async function dlPackages(manifestBody, useParallel = form.parallelDownloads.che
 
         const downloadPromises = filesToDownload.map(packageName => {
             const blobUrl = versionPath + packageName;
-            progressMap[blobUrl] = {
-                loaded: 0,
-                total: 0
-            };
+            progressMap[blobUrl] = { loaded: 0, total: 0 };
             log(`[+] Fetching "${packageName}"...`);
             return fetchBin(blobUrl, (loaded, total) => {
-                    progressMap[blobUrl] = {
-                        loaded,
-                        total
-                    };
-                    syncProgress();
-                }).then(blobData => procPkg(packageName, blobData))
-                .catch(err => {
-                    log(`[!] Error downloading "${packageName}": ${err.message}`);
-                    logWarpHint();
-                    throw err;
-                });
+                progressMap[blobUrl] = { loaded, total };
+                syncProgress();
+            }).then(blobData => procPkg(packageName, blobData))
+              .catch(err => { log(`[!] Error downloading "${packageName}": ${err.message}`); logWarpHint(); throw err; });
         });
 
         try {
@@ -1000,37 +938,19 @@ async function dlPackages(manifestBody, useParallel = form.parallelDownloads.che
         }
     }
 
-    let launcherIncluded = false;
-    let launcherSkippedReason = null;
-
     // Download launcher if needed
     if (includeLauncher === true && (binaryType === "WindowsPlayer" || binaryType === "WindowsStudio64")) {
         log(`[+] Downloading WEAO RDD Launcher...`);
         setProgress(0, `Starting download for weblauncher.exe...`);
-
-        try {
-            const launcherData = await fetchBin(
-                "https://curly-shape-1578.vnnaworks.workers.dev/",
-                (loaded, total) => {
-                    if (total > 0) {
-                        setProgress(
-                            Math.round((loaded / total) * 100),
-                            `Downloading weblauncher.exe: ${fmtBytes(loaded)} / ${fmtBytes(total)}`
-                        );
-                    }
-                }
-            );
-
-            log(`[+] Received WEAO RDD Launcher!`);
-            zip.file("weblauncher.exe", launcherData);
-            launcherIncluded = true;
-        } catch (err) {
-            launcherSkippedReason = err?.message || "Network request failed";
-
-            log(`[!] Weblauncher was not included because the download was blocked or failed.`);
-            log(`[*] This is usually caused by your Antivirus, firewall, browser protection, or DNS filtering.`);
-            log(`[*] Roblox files will still be packed normally. You can launch manually with RobloxPlayerBeta.exe.`);
-        }
+        await new Promise((resolve) => {
+            xhrBin("https://curly-shape-1578.vnnaworks.workers.dev/", function(launcherData) {
+                log(`[+] Received WEAO RDD Launcher!`);
+                zip.file("weblauncher.exe", launcherData);
+                resolve();
+            }, function(percentage, loaded, total) {
+                setProgress(percentage, `Downloading weblauncher.exe: ${fmtBytes(loaded)} / ${fmtBytes(total)}`);
+            });
+        });
     }
 
     buildZip();
@@ -1042,11 +962,8 @@ async function dlPackages(manifestBody, useParallel = form.parallelDownloads.che
             log(`[!] NOTE: Compressing final zip (level ${compressionLevel}/9) — this runs on the main thread and may freeze the page for a while. Most of the content is already zipped so gains are minimal.`);
         }
         log("Thank you for using WEAO RDD! If you have any issues, please report them at our discord server: https://discord.gg/weaoxyz");
-        if (launcherIncluded) {
-          log(`Make sure to open "weblauncher.exe" to be able to launch from Roblox.com! (This is optional, otherwise open "RobloxPlayerBeta.exe")`);
-        } else if (includeLauncher && launcherSkippedReason) {
-          log(`[!] weblauncher.exe was requested but was not included: ${launcherSkippedReason}`);
-          log(`[*] The zip is still usable. Open "RobloxPlayerBeta.exe" manually if needed.`);
+        if (includeLauncher && (binaryType === "WindowsPlayer" || binaryType === "WindowsStudio64")) {
+            log(`Make sure to open "weblauncher.exe" to be able to launch from Roblox.com! (This is optional, otherwise open "RobloxPlayerBeta.exe")`);
         }
         log(`[+] Exporting assembled zip file "${outputFileName}"..`);
         hideProgress();
@@ -1054,9 +971,7 @@ async function dlPackages(manifestBody, useParallel = form.parallelDownloads.che
         zip.generateAsync({
             type: "arraybuffer",
             compression: compressZip ? "DEFLATE" : "STORE",
-            compressionOptions: {
-                level: compressionLevel
-            }
+            compressionOptions: { level: compressionLevel }
         }, function update(metadata) {
             const percentage = metadata.percent.toFixed(2);
             setProgress(percentage, `Compressing: ${percentage}%`);
