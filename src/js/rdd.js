@@ -1025,7 +1025,7 @@ async function dlPackages(manifestBody, useParallel = form.parallelDownloads.che
             zip.file("weblauncher.exe", launcherData);
             launcherIncluded = true;
         } catch (err) {
-            launcherSkippedReason = err ? .message || "Network request failed";
+            launcherSkippedReason = err?.message || "Network request failed";
 
             log(`[!] Weblauncher was not included because the download was blocked or failed.`);
             log(`[*] This is usually caused by your Antivirus, firewall, browser protection, or DNS filtering.`);
