@@ -554,6 +554,7 @@ function fetchBin(url, progressCallback = null) {
         const httpRequest = new XMLHttpRequest();
         httpRequest.open("GET", url, true);
         httpRequest.responseType = "arraybuffer";
+        httpRequest.timeout = 30000;
 
         if (progressCallback) {
             httpRequest.onprogress = function(event) {
@@ -568,20 +569,30 @@ function fetchBin(url, progressCallback = null) {
                 reject(new Error(`HTTP ${httpRequest.status}`));
                 return;
             }
+
             if (!httpRequest.response) {
                 reject(new Error("No ArrayBuffer in response"));
                 return;
             }
+
             resolve(httpRequest.response);
         };
 
         httpRequest.onerror = function() {
-            reject(new Error("Network error"));
+            reject(new Error("Network error / blocked request"));
+        };
+
+        httpRequest.ontimeout = function() {
+            reject(new Error("Request timed out"));
+        };
+
+        httpRequest.onabort = function() {
+            reject(new Error("Request aborted"));
         };
 
         httpRequest.send();
     });
-};
+}
 
 function getQuery(queryString) {  
     if (!urlParams.has(queryString)) {    
@@ -1031,8 +1042,11 @@ async function dlPackages(manifestBody, useParallel = form.parallelDownloads.che
             log(`[!] NOTE: Compressing final zip (level ${compressionLevel}/9) — this runs on the main thread and may freeze the page for a while. Most of the content is already zipped so gains are minimal.`);
         }
         log("Thank you for using WEAO RDD! If you have any issues, please report them at our discord server: https://discord.gg/weaoxyz");
-        if (includeLauncher && (binaryType === "WindowsPlayer" || binaryType === "WindowsStudio64")) {
-            log(`Make sure to open "weblauncher.exe" to be able to launch from Roblox.com! (This is optional, otherwise open "RobloxPlayerBeta.exe")`);
+        if (launcherIncluded) {
+          log(`Make sure to open "weblauncher.exe" to be able to launch from Roblox.com! (This is optional, otherwise open "RobloxPlayerBeta.exe")`);
+        } else if (includeLauncher && launcherSkippedReason) {
+          log(`[!] weblauncher.exe was requested but was not included: ${launcherSkippedReason}`);
+          log(`[*] The zip is still usable. Open "RobloxPlayerBeta.exe" manually if needed.`);
         }
         log(`[+] Exporting assembled zip file "${outputFileName}"..`);
         hideProgress();
