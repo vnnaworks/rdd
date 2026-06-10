@@ -776,7 +776,7 @@ async function main() {
             const base = hn.length > 2 ? `${location.protocol}//${hn.slice(-2).join('.')}` : `${location.protocol}//${hn.join('.')}`;
             const list = await fetch(`${base}/api/status/exploits`).then(r => r.json());
             const m = list.find(e => e.title.toLowerCase() === exploit.toLowerCase());
-            if (m ? .rbxversion) {
+            if (m?.rbxversion) {
                 version = m.rbxversion;
                 log(`[*] Resolved exploit "${m.title}": ${version}`);
             } else {
