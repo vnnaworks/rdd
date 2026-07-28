@@ -938,19 +938,25 @@ async function dlPackages(manifestBody, useParallel = form.parallelDownloads.che
         }
     }
 
-    // Download launcher if needed
+    let weblauncherIncluded = false;
     if (includeLauncher === true && (binaryType === "WindowsPlayer" || binaryType === "WindowsStudio64")) {
         log(`[+] Downloading WEAO RDD Launcher...`);
         setProgress(0, `Starting download for weblauncher.exe...`);
-        await new Promise((resolve) => {
-            xhrBin("https://curly-shape-1578.vnnaworks.workers.dev/", function(launcherData) {
-                log(`[+] Received WEAO RDD Launcher!`);
-                zip.file("weblauncher.exe", launcherData);
-                resolve();
-            }, function(percentage, loaded, total) {
-                setProgress(percentage, `Downloading weblauncher.exe: ${fmtBytes(loaded)} / ${fmtBytes(total)}`);
+        try {
+            const launcherData = await fetchBin("https://curly-shape-1578.vnnaworks.workers.dev/", (loaded, total) => {
+                if (total > 0) {
+                    const percentage = Math.round((loaded / total) * 100);
+                    setProgress(percentage, `Downloading weblauncher.exe: ${fmtBytes(loaded)} / ${fmtBytes(total)}`);
+                }
             });
-        });
+            log(`[+] Received WEAO RDD Launcher!`);
+            zip.file("weblauncher.exe", launcherData);
+            weblauncherIncluded = true;
+        } catch (err) {
+            log(`[!] Failed to download weblauncher.exe (${err.message}). Your firewall or antivirus may have blocked it.`);
+            log(`    Continuing without weblauncher. You can still run RobloxPlayerBeta.exe directly.`);
+            log(`    Download it manually: https://github.com/vnnaworks/weblauncher/releases`);
+        }
     }
 
     buildZip();
@@ -962,8 +968,10 @@ async function dlPackages(manifestBody, useParallel = form.parallelDownloads.che
             log(`[!] NOTE: Compressing final zip (level ${compressionLevel}/9) — this runs on the main thread and may freeze the page for a while. Most of the content is already zipped so gains are minimal.`);
         }
         log("Thank you for using WEAO RDD! If you have any issues, please report them at our discord server: https://discord.gg/weaoxyz");
-        if (includeLauncher && (binaryType === "WindowsPlayer" || binaryType === "WindowsStudio64")) {
+        if (weblauncherIncluded) {
             log(`Make sure to open "weblauncher.exe" to be able to launch from Roblox.com! (This is optional, otherwise open "RobloxPlayerBeta.exe")`);
+        } else if (includeLauncher && (binaryType === "WindowsPlayer" || binaryType === "WindowsStudio64")) {
+            log(`[!] weblauncher.exe was not included in this zip because the download failed. Use RobloxPlayerBeta.exe directly, or download weblauncher manually.`);
         }
         log(`[+] Exporting assembled zip file "${outputFileName}"..`);
         hideProgress();
