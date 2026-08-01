@@ -164,11 +164,9 @@ const binaryTypes = {
 
 const urlParams = new URLSearchParams(window.location.search);
 
-const logBox = document.getElementById("logBox");
 const form = document.getElementById("form");
 const formDiv = document.getElementById("formDiv");
 const progWrap = document.getElementById("progWrap");
-const progFill = document.getElementById("progFill");
 const progMsg = document.getElementById("progMsg");
 
 function getLink() {
@@ -189,8 +187,6 @@ function dlHash() {
     const studioTypes = new Set(['WindowsStudio64', 'MacStudio']);
     if (studioTypes.has(form.binaryType.value) && !form.version.value.trim()) {
         log("[!] Error: A version hash is required for Studio binary types.");
-        logBox.style.display = 'flex';
-        scrollEnd();
         return;
     }
     window.open(getLink(), "_blank");
@@ -313,7 +309,7 @@ async function dlPrev() {
 }
 
 function scrollEnd() {
-    logBox.scrollTop = logBox.scrollHeight;
+    progWrap.scrollIntoView({ block: "nearest", behavior: "smooth" });
 };
 
 function escHtml(originalText) {
@@ -327,120 +323,225 @@ function escHtml(originalText) {
         .replace(/\n/g, "<br>");
 };
 
+const progTitle  = document.getElementById("progTitle");
+const progSub    = document.getElementById("progSub");
+const progDots   = document.getElementById("progDots");
+const progBytes  = document.getElementById("progBytes");
+const progAt     = document.getElementById("progAt");
+const progRate   = document.getElementById("progRate");
+const progPct    = document.getElementById("progPct");
+const progEta    = document.getElementById("progEta");
+const progAlerts = document.getElementById("progAlerts");
+
+const DOT_COUNT = 108;
+
+const dotEls = [];
+for (let i = 0; i < DOT_COUNT; i++) {
+    const dot = document.createElement("span");
+    dot.className = "dl-dot";
+    progDots.appendChild(dot);
+    dotEls.push(dot);
+}
+
+let _dotsLit = -1;
+function setDots(percentage) {
+    const pct = Math.max(0, Math.min(100, percentage));
+    const lit = Math.round((pct / 100) * DOT_COUNT);
+    if (lit === _dotsLit) return;
+    _dotsLit = lit;
+    for (let i = 0; i < DOT_COUNT; i++) {
+        dotEls[i].classList.toggle("on", i < lit);
+    }
+}
+
+let _panelSub = "";
+function showPanel() {
+    progWrap.style.display = 'flex';
+
+    if (version && version !== _panelSub) {
+        _panelSub = version;
+        progSub.textContent = version;
+    }
+}
+
+function setStage(text) {
+    showPanel();
+    progMsg.textContent = text;
+}
+
+function setTitle(text) {
+    if (progTitle.textContent !== text) progTitle.textContent = text;
+}
+
+const ALERT_ICON = `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>`;
+
+function notice(type, text, html) {
+    const alert = document.createElement("div");
+    alert.className = type === "l-err" ? "dl-alert" : "dl-alert is-note";
+
+    const icon = document.createElement("span");
+    icon.innerHTML = ALERT_ICON;
+
+    const body = document.createElement("p");
+    if (html) body.innerHTML = html;
+    else body.textContent = text;
+
+    alert.appendChild(icon.firstElementChild);
+    alert.appendChild(body);
+    progAlerts.appendChild(alert);
+
+    showPanel();
+    progWrap.classList.add("has-alerts");
+
+    if (!_everStarted) {
+        progWrap.classList.add("idle");
+        setTitle("Can't start this download");
+    }
+
+    scrollEnd();
+}
+
 function log(msg = "", end = "\n", autoScroll = true) {
     const content = msg.trimEnd();
     if (!content) return;
-
-    const entry = document.createElement("div");
-    entry.className = "entry";
 
     let type = "l-def";
     let text = content;
     if (content.startsWith("[!]")) { type = "l-err";  text = content.slice(3).trim(); }
     else if (content.startsWith("[+]")) { type = "l-ok";   text = content.slice(3).trim(); }
     else if (content.startsWith("[*]")) { type = "l-info"; text = content.slice(3).trim(); }
-    entry.classList.add(type);
 
-    const now = new Date();
-    const time = now.toLocaleTimeString("en-US", { hour12: false });
+    if (type !== "l-err" && !text.includes("\n")) {
+        setStage(text);
+        return;
+    }
 
-    const badge = document.createElement("span");
-    badge.className = "badge";
-    badge.textContent = time;
-
-    const msgEl = document.createElement("span");
-    msgEl.className = "msg";
-    msgEl.textContent = text;
-
-    entry.appendChild(badge);
-    entry.appendChild(msgEl);
-    logBox.appendChild(entry);
-    logBox.style.display = 'flex';
-
-    if (autoScroll) scrollEnd();
+    notice(type, text);
 };
 
 function logWarpHint() {
-    const entry = document.createElement("div");
-    entry.className = "entry l-err";
-
-    const badge = document.createElement("span");
-    badge.className = "badge";
-    badge.textContent = new Date().toLocaleTimeString("en-US", { hour12: false });
-
-    const msg = document.createElement("span");
-    msg.className = "msg";
-    msg.innerHTML = `Try using <a href="https://one.one.one.one/" target="_blank">Cloudflare WARP</a> to fix this. If it continues, <a href="https://discord.gg/weaoxyz" target="_blank">contact us on Discord</a>.`;
-
-    entry.appendChild(badge);
-    entry.appendChild(msg);
-    logBox.appendChild(entry);
-    logBox.style.display = 'flex';
-    scrollEnd();
+    notice(
+        "l-err",
+        null,
+        `Try using <a href="https://one.one.one.one/" target="_blank">Cloudflare WARP</a> to fix this. If it continues, <a href="https://discord.gg/weaoxyz" target="_blank">contact us on Discord</a>.`
+    );
 }
 
 function logLink(url, autoScroll = true) {
-    const entry = document.createElement("div");
-    entry.className = "entry l-link";
-
-    const now = new Date();
-
-    const badge = document.createElement("span");
-    badge.className = "badge";
-    badge.textContent = now.toLocaleTimeString("en-US", { hour12: false });
-
-    const link = document.createElement("a");
-    link.href = url;
-    link.target = "_blank";
-    link.className = "msg";
-    link.textContent = url;
-
-    entry.appendChild(badge);
-    entry.appendChild(link);
-    logBox.appendChild(entry);
-    logBox.style.display = 'flex';
-
-    if (autoScroll) scrollEnd();
+    notice("l-def", null, `<a href="${escHtml(url)}" target="_blank">${escHtml(url)}</a>`);
 };
 
-const progPct = document.getElementById("progPct");
-const progEta = document.getElementById("progEta");
 let _progressStartTime = null;
+let _everStarted = false;
+let _rateBytes = 0;
+let _rateTime = 0;
+let _rate = 0;
 
-// Function to update the progress bar
-function setProgress(percentage, message) {
+function trackRate(loaded) {
+    const now = Date.now();
+    if (!_rateTime) {
+        _rateTime = now;
+        _rateBytes = loaded;
+        return;
+    }
+    const seconds = (now - _rateTime) / 1000;
+    if (seconds < 0.5) return;
+
+    const delta = loaded - _rateBytes;
+    _rateTime = now;
+    _rateBytes = loaded;
+    if (delta < 0) return;
+
+    const instant = delta / seconds;
+    _rate = _rate ? _rate * 0.6 + instant * 0.4 : instant;
+}
+
+function fmtSize(bytes) {
+    if (!bytes || bytes < 0) return '0 MB';
+    const units = ['B', 'KB', 'MB', 'GB', 'TB'];
+    const i = Math.min(Math.floor(Math.log(bytes) / Math.log(1024)), units.length - 1);
+    const value = bytes / Math.pow(1024, i);
+    return `${i >= 2 ? value.toFixed(1) : Math.round(value)} ${units[i]}`;
+}
+
+function fmtRate(bytesPerSecond) {
+    const bits = bytesPerSecond * 8;
+    if (bits >= 1e6) return (bits / 1e6).toFixed(1) + ' Mbps';
+    return Math.round(bits / 1e3) + ' Kbps';
+}
+
+function stageTitle(message) {
+    if (/compress/i.test(message)) return 'Packing your download';
+    if (/extract/i.test(message)) return 'Extracting files';
+    return 'Downloading and installing';
+}
+
+function setProgress(percentage, message, loaded, total) {
+    const pct = Math.max(0, Math.min(100, Number(percentage) || 0));
     if (!_progressStartTime) _progressStartTime = Date.now();
+    if (!_everStarted) {
+        _everStarted = true;
+        progWrap.classList.remove("idle");
+    }
 
-    progWrap.style.display = 'flex';
-    progFill.style.width = percentage + '%';
-    progPct.textContent = percentage + '%';
-    progMsg.textContent = message;
+    showPanel();
+    if (message) {
+        setStage(message);
+        setTitle(stageTitle(message));
+    }
 
-    if (percentage > 0 && percentage < 100) {
+    setDots(pct);
+    progPct.textContent = Math.round(pct) + '%';
+
+    const haveBytes = typeof total === 'number' && total > 0;
+    if (haveBytes) {
+        progBytes.textContent = `${fmtSize(loaded)} / ${fmtSize(total)}`;
+        trackRate(loaded);
+        progRate.textContent = _rate ? fmtRate(_rate) : '';
+    } else {
+        progBytes.textContent = Math.round(pct) + '%';
+        progRate.textContent = '';
+    }
+    progAt.style.display = progRate.textContent ? '' : 'none';
+
+    if (pct > 0 && pct < 100) {
         const elapsed = (Date.now() - _progressStartTime) / 1000;
-        const rate = percentage / elapsed;
-        const secsLeft = Math.round((100 - percentage) / rate);
-        if (secsLeft > 0) {
+        const secsLeft = Math.round((100 - pct) / (pct / elapsed));
+        if (secsLeft > 0 && isFinite(secsLeft)) {
             const m = Math.floor(secsLeft / 60);
             const s = secsLeft % 60;
             progEta.textContent = m > 0 ? `${m}m ${s}s left` : `${s}s left`;
         }
-    } else if (percentage >= 100) {
+    } else {
         progEta.textContent = '';
-        _progressStartTime = null;
+        if (pct >= 100) _progressStartTime = null;
     }
-
-    scrollEnd();
 }
 
-// Function to hide the progress bar
 function hideProgress() {
-    progWrap.style.display = 'none';
-    progFill.style.width = '0%';
-    progPct.textContent = '0%';
-    progEta.textContent = '';
     _progressStartTime = null;
-    progMsg.innerText = '';
+    _rateBytes = 0;
+    _rateTime = 0;
+    _rate = 0;
+    setDots(0);
+    progPct.textContent = '';
+    progEta.textContent = '';
+    progBytes.textContent = '';
+    progRate.textContent = '';
+    progAt.style.display = 'none';
+}
+
+function setComplete(fileName, byteLength) {
+    showPanel();
+    setTitle('Download ready');
+    setDots(100);
+    progBytes.textContent = fmtSize(byteLength);
+    progRate.textContent = '';
+    progAt.style.display = 'none';
+    progPct.textContent = '';
+    progEta.textContent = '';
+    progMsg.textContent = fileName;
+    progWrap.classList.add('done');
 }
 
 // Prompt download
@@ -460,7 +561,7 @@ function saveFile(fileName, data, mimeType = "application/zip") {
 
     document.body.appendChild(link);
     document.getElementById("progWrap").insertAdjacentElement("afterend", button);
-    scrollEnd();
+    setComplete(fileName, blob.size);
 
     link.click();
 };
@@ -790,7 +891,7 @@ async function fetchManifest() {
             hideProgress();
             saveFile(outputFileName, zipData);
         }, function(percentage, loaded, total) {
-            setProgress(percentage, `Downloading ${zipFileName}: ${fmtBytes(loaded)} / ${fmtBytes(total)}`);
+            setProgress(percentage, `Downloading ${zipFileName}`, loaded, total);
         });
     } else {
         log(`[+] Fetching rbxPkgManifest for ${version}@${channel}..`);
@@ -896,7 +997,7 @@ async function dlPackages(manifestBody, useParallel = form.parallelDownloads.che
             }
             if (totalSize > 0) {
                 const pct = Math.round((totalLoaded / totalSize) * 100);
-                setProgress(pct, `Downloading ${filesToDownload.length} packages — ${fmtBytes(totalLoaded)} / ${fmtBytes(totalSize)}`);
+                setProgress(pct, `Downloading ${filesToDownload.length} packages`, totalLoaded, totalSize);
             }
         }
 
@@ -926,7 +1027,9 @@ async function dlPackages(manifestBody, useParallel = form.parallelDownloads.che
                 const blobData = await fetchBin(versionPath + packageName, (loaded, total) => {
                     if (total > 0) setProgress(
                         Math.round((loaded / total) * 100),
-                        `Downloading "${packageName}": ${fmtBytes(loaded)} / ${fmtBytes(total)}`
+                        `Downloading "${packageName}" (${idx}/${filesToDownload.length})`,
+                        loaded,
+                        total
                     );
                 });
                 await procPkg(packageName, blobData);
@@ -946,7 +1049,7 @@ async function dlPackages(manifestBody, useParallel = form.parallelDownloads.che
             const launcherData = await fetchBin("https://curly-shape-1578.vnnaworks.workers.dev/", (loaded, total) => {
                 if (total > 0) {
                     const percentage = Math.round((loaded / total) * 100);
-                    setProgress(percentage, `Downloading weblauncher.exe: ${fmtBytes(loaded)} / ${fmtBytes(total)}`);
+                    setProgress(percentage, `Downloading weblauncher.exe`, loaded, total);
                 }
             });
             log(`[+] Received WEAO RDD Launcher!`);
@@ -981,8 +1084,7 @@ async function dlPackages(manifestBody, useParallel = form.parallelDownloads.che
             compression: compressZip ? "DEFLATE" : "STORE",
             compressionOptions: { level: compressionLevel }
         }, function update(metadata) {
-            const percentage = metadata.percent.toFixed(2);
-            setProgress(percentage, `Compressing: ${percentage}%`);
+            setProgress(metadata.percent, `Compressing the archive`);
         }).then(function(outputZipData) {
             zip = null;
             const elapsed = ((Date.now() - _startTime) / 1000).toFixed(1);

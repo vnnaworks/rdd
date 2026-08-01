@@ -139,18 +139,26 @@
         </div>
     </div>
 
-    <div id="logBox"></div>
-    <div id="progWrap">
-        <div class="phdr">
+    <div id="progWrap" role="status" aria-live="polite">
+        <p class="dl-title" id="progTitle">Downloading and installing</p>
+        <p class="dl-sub" id="progSub"></p>
+        <div class="dl-dots" id="progDots" aria-hidden="true"></div>
+        <p class="dl-readout">
+            <span id="progBytes">0 MB</span>
+            <span class="dl-at" id="progAt">@</span>
+            <span class="dl-rate" id="progRate"></span>
+        </p>
+        <div class="dl-foot">
             <span id="progMsg"></span>
-            <div class="pright">
+            <span class="pright">
                 <span id="progEta"></span>
-                <span id="progPct">0%</span>
-            </div>
+                <span id="progPct"></span>
+            </span>
         </div>
-        <div class="ptrack">
-            <div id="progFill"></div>
-        </div>
+        <div class="dl-alerts" id="progAlerts"></div>
+        <p class="dl-note">Keep this tab open until it finishes</p>
+        <img class="dl-cat dl-cat-working" src="img/working.png" width="270" height="480" alt="" aria-hidden="true">
+        <img class="dl-cat dl-cat-done" src="img/done.png" width="270" height="480" alt="" aria-hidden="true">
     </div>
 </body>
 
@@ -257,7 +265,7 @@
                 const hint = document.querySelector('#versionRow .hint');
                 if (hint) {
                     hint.textContent      = studio ? 'Required' : 'Optional';
-                    hint.style.color      = studio ? 'rgba(236,59,71,0.65)' : '';
+                    hint.style.color      = studio ? '#f2807c' : '';
                     hint.style.fontWeight = studio ? '500' : '';
                 }
                 wrap.querySelectorAll('.ex-pill').forEach(p => {
